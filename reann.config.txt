@@ -1,0 +1,3 @@
+-type SeqFile -chunk 2 -prefix this -format fasta
+-type Blast -exec blastp.exe -db %NR% -evalue 0
+-type Blast -exec blastp.exe -db %NR% -evalue 1
