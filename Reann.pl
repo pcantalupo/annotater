@@ -8,7 +8,12 @@ my %h = ("num_threads",4,
 		"outfmt",6,
 		"restart",'restart.txt',
 		"file","test.fa",
-		"config","reann.config.txt");
+		"config","reann.config.txt",
+		"output", "report.csv",
+		"chunk",11,
+		"prefix","this",
+		"format","fasta",
+		"delim",",");
 
 my $r = GetOptions(\%h,qw(qc=i pid=i e=i num_threads=i folder=s)); 
 

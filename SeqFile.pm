@@ -25,8 +25,8 @@ sub Chunk{
 	my $seqO;
 	my @files;
 	my $seq;
-	for(my $i = 1; $seq = $seqI->next_seq; $i++){
-		if(!$seqO || (($i % ($self->{'chunk'}+1)) == 0)){
+	for(my $i = 0; $seq = $seqI->next_seq; $i++){
+		if((($i % ($self->{'chunk'})) == 0)){
 			my $file = join(".",$self->{'prefix'},$count,$self->{'format'});
 			$count++;
 			push(@files,$file);
@@ -51,9 +51,9 @@ sub FilterSeqs{
 	my $seqI = new Bio::SeqIO(-file => $self->{'files'}[$i], -format => $self->{'format'});	
 	my $seqO = new Bio::SeqIO(-file => ">".$self->{'files'}[$i].".temp",-format => $self->{'format'});
 	
-	#while(my $seq = $seqI->next_seq){
-	#	$seqO->write_seq if !$filter->{$seq->id};	
-	#}
+	while(my $seq = $seqI->next_seq){
+		$seqO->write_seq($seq) if !$filter->{$seq->id};	
+	}
 	$seqO = '';
 	$seqI = '';
 	$self->Overwrite($self->{'files'}[$i].".temp",$self->{'files'}[$i]);

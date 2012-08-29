@@ -9,7 +9,7 @@ sub new{
 	my $cutoffs = shift;
 	my %mm = ('outfmt',6,
 				'num_threads', 4);
-	my $r = GetOptionsFromString($options,\%mm,qw(exec=s outfmt type=s num_threads=i db=s max_target_seqs=i evalue=s),
+	my $r = GetOptionsFromString($options,\%mm,qw(exec=s type=s num_threads=i db=s max_target_seqs=i evalue=s),
 									qw(b_evalue=s f_evalue=s pid=i coverage=i));
 	$self = \%mm;
 	bless $self,$class;
@@ -21,8 +21,10 @@ sub new{
 sub Build{
 	my $self = shift;
 	my $command;
+	my $outfmt = '-outfmt "6 '.join(' ',qw(qseqid sseqid pident length mismatch
+gapopen qstart qend sstart send evalue bitscore qlen)).'"';
 	$command = join(' ',$self->{'exec'},'-show_gis',"-num_threads",
-		$self->{'num_threads'},"-outfmt",$self->{'outfmt'}, "-db",$self->{'db'});
+		$self->{'num_threads'}, $outfmt,"-db",$self->{'db'});
 	$command = join(' ',$command,"-max_target_seqs",$self->{'max_target_seqs'}) if $self->{'max_target_seqs'};
 	$command = join(' ',$command,"-evalue",$self->{'b_evalue'}) if defined($self->{'b_evalue'});
 	$self->{'command'} = $command;
@@ -31,12 +33,13 @@ sub run{
 	my $self = shift;
 	my ($in,$i,$r) = @_;
 	my $out = $self->GetOutName(@_);
+	my %filter;
 	if(!$r){
 		my $cmd = join(' ',$self->{'command'},'-query',$in,'-out',$out);
 		`$cmd`;
 	}
-	my $f = $self->GetFilter($out);
-	return ($out,$f);
+	$self->Parse($out,\%filter);
+	return ($out,\%filter);
 }
 sub GetFilter{
 	my $self = shift;
@@ -74,11 +77,16 @@ sub TestOptions{
 sub Pass{
 	my $self = shift;
 	my @cols = @_;	
+	
+	return 1 if($self->{'cutoffs'}{'evalue'} >= $cols[10]
+		&& $self->{'cutoffs'}{'pid'} <= $cols[2] 
+		&& $self->{'cutoffs'}{'coverage'} <= (100*($cols[3]/$cols[12])));
+	return 0;
 }
 sub SetCutOffs{
 	my $self = shift;
 	my $cuts = shift;
-	my %set = %{$cuts};
+	my %set = %{$cuts} if $cuts;
 	$set{'evalue'} = $self->{'c_evalue'} if defined($self->{'c_evalue'});
 	$set{'pid'} = $self->{'c_pid'} if defined($self->{'c_pid'});
 	$set{'coverage'} = $self->{'c_coverage'} if defined($self->{'c_coverage'});
@@ -86,6 +94,44 @@ sub SetCutOffs{
 	$set{'pid'} = 0 if !defined($set{'pid'});
 	$set{'coverage'} = 0 if !defined($set{'coverage'});
 	return \%set;
+}
+sub Parse{
+	my $self = shift;
+	if($self->{'outfmt'}){
+		$self->ParseOutfmt(@_);	
+	}
+	else{
+		
+	}
+}
+sub ParseOutfmt{
+	my $self = shift;
+	my $file = shift;
+	my $report = shift;
+	my $delim = $self->GetDelim;
+	open IN, $file;
+	while(<IN>){
+		chomp $_;
+		my @cols = split $delim, $_;
+		if($self->Pass(@cols) 
+			&& (!$report->{$cols[0]} || $report->{$cols[0]}{'evalue'} > $cols[10])){
+			$report->{$cols[0]}{'evalue'} = $cols[10];
+			$report->{$cols[0]}{'pid'} = $cols[2];	
+			$report->{$cols[0]}{'accession'} = $cols[1];
+			$report->{$cols[0]}{'coverage'} = (100*($cols[3]/$cols[12]));
+			$report->{$cols[0]}{'length'} = $cols[12];
+			$report->{$cols[0]}{'algorithm'} = $self->{'exec'};
+			$report->{$cols[0]}{'db'} = $self->{'db'};
+			my @pos = @cols[6..9];
+			$report->{$cols[0]}{'pos'} = \@pos;
+		}
+	}
+	close IN;
+}
+sub GetDelim{
+	my $self = shift;
+	return "\t" if $self->{'outfmt'} == 6;
+	return "," if $self->{'outfmt'} == 10;	
 }
 1;
 

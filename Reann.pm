@@ -118,13 +118,28 @@ sub PrintParams{
 }	
 sub Report{
 	my $self = shift;
-	
+	my @h = qw(seqID seq seqLength pid coverage e accession algorithm db qstart qend sstart ssend);
 	print "report",$/;
+	my $d = $self->{'delim'};
+	my %blast;
+	my $out = $self->{'prefix'}.".".$self->{'output'};
 	for(my $x = 0; $x < scalar @{$self->{'out'}}; $x++){
 		for(my $y = 0; $y < scalar @{$self->{'out'}[$x]}; $y++){
-			print $self->{'out'}[$x][$y],$/;
+			$self->{'programs'}[$y]->Parse($self->{'out'}[$x][$y],\%blast);
 		}	
-	}	
+	}
+	open OUT, ">$out";
+	print OUT join($d,@h),$/;
+	my $seqI = new Bio::SeqIO(-file => $self->{'file'},-format => $self->{'format'});
+	while(my $seq = $seqI->next_seq){
+		my $i = $seq->id;
+		my $reportline = '';
+		$reportline = join($d,$blast{$i}{'pid'},$blast{$i}{'coverage'},
+			$blast{$i}{'evalue'},$blast{$i}{'accession'},$blast{$i}{'algorithm'},
+			$blast{$i}{'db'},@{$blast{$i}{'pos'}}) if $blast{$i};
+		print OUT join($d,$i,$seq->seq,$seq->length,$reportline),$/;
+	}
+	close OUT;
 }
 1;
 
