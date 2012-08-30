@@ -12,8 +12,10 @@ my %h = ("num_threads",4,
 		"config","reann.config.txt",
 		"output", "report.txt",
 		"prefix","ann",
+		"format","fasta",
+		"evalue","1e-5",
 		"delim","\t");
-my @keys = qw(coverage=f pid=f evalue=f num_threads=i folder=s file=s output=s chunk=i delim=s
+my @keys = qw(qc=f pid=f evalue=f num_threads=i folder=s file=s output=s chunk=i delim=s
 config=s restart=s outfmt=i prefix=s format=s outfmt_str=s );
 my $r = GetOptions(\%h,@keys); 
 
@@ -23,6 +25,7 @@ $run->Report;
 
 
 =pod
+
 =head1 Reann.pl
 Perl pipline for blast annotation of sequences
 

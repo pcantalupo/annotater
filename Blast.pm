@@ -6,15 +6,17 @@ sub new{
 	my $class = shift;
 	my $self;
 	my $options = shift;
-	my $cutoffs = shift;
+	my $default = shift;
 	my %mm = ('outfmt',6,
 				'num_threads', 4);
-	$mm{'num_threads'} = $cutoffs->{'num_threads'};
+	$mm{'num_threads'} = $default->{'num_threads'};
+	$mm{'outfmt'} = $default->{'outfmt'};
+	$mm{'evalue'} = $default->{'evalue'};
 	my $r = GetOptionsFromString($options,\%mm,qw(exec=s type=s num_threads=i db=s max_target_seqs=i evalue=s),
 									qw(f_evalue=s pid=i qc=i));
 	$self = \%mm;
 	bless $self,$class;
-	$self->{'cutoffs'} = $self->SetCutOffs($cutoffs);
+	$self->{'cutoffs'} = $self->SetCutOffs($default);
 	$self->TestOptions();
 	$self->Build;
 	return $self;
@@ -37,6 +39,7 @@ sub run{
 	my %filter;
 	if(!$r){
 		my $cmd = join(' ',$self->{'command'},'-query',$in,'-out',$out);
+		print $cmd,$/;
 		`$cmd`;
 	}
 	$self->Parse($out,\%filter);
