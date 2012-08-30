@@ -10,7 +10,7 @@ sub new{
 	my %mm = ('outfmt',6,
 				'num_threads', 4);
 	my $r = GetOptionsFromString($options,\%mm,qw(exec=s type=s num_threads=i db=s max_target_seqs=i evalue=s),
-									qw(b_evalue=s f_evalue=s pid=i coverage=i));
+									qw(f_evalue=s pid=i qc=i));
 	$self = \%mm;
 	bless $self,$class;
 	$self->{'cutoffs'} = $self->SetCutOffs($cutoffs);
@@ -26,7 +26,7 @@ gapopen qstart qend sstart send evalue bitscore qlen)).'"';
 	$command = join(' ',$self->{'exec'},'-show_gis',"-num_threads",
 		$self->{'num_threads'}, $outfmt,"-db",$self->{'db'});
 	$command = join(' ',$command,"-max_target_seqs",$self->{'max_target_seqs'}) if $self->{'max_target_seqs'};
-	$command = join(' ',$command,"-evalue",$self->{'b_evalue'}) if defined($self->{'b_evalue'});
+	$command = join(' ',$command,"-evalue",$self->{'evalue'}) if defined($self->{'evalue'});
 	$self->{'command'} = $command;
 }
 sub run{
@@ -87,9 +87,9 @@ sub SetCutOffs{
 	my $self = shift;
 	my $cuts = shift;
 	my %set = %{$cuts} if $cuts;
-	$set{'evalue'} = $self->{'c_evalue'} if defined($self->{'c_evalue'});
-	$set{'pid'} = $self->{'c_pid'} if defined($self->{'c_pid'});
-	$set{'coverage'} = $self->{'c_coverage'} if defined($self->{'c_coverage'});
+	$set{'evalue'} = $self->{'evalue'} if defined($self->{'f_evalue'});
+	$set{'pid'} = $self->{'pid'} if defined($self->{'pid'});
+	$set{'coverage'} = $self->{'coverage'} if defined($self->{'coverage'});
 	$set{'evalue'} = 10 if !defined($set{'evalue'});
 	$set{'pid'} = 0 if !defined($set{'pid'});
 	$set{'coverage'} = 0 if !defined($set{'coverage'});
