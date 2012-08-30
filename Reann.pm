@@ -8,24 +8,19 @@ use Blast;
 sub new{
 	my $class = shift;
 	my $self = shift;
-	
 	my @programs;
-	
+	my %seqFile = %{$self};
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
 	Copy($self->{'config'},$self->{'folder'});
 	Copy($self->{'file'},$self->{'folder'});
 	chdir($self->{'folder'});
+	$self->{'seqs'} = new SeqFile(\%seqFile);
 	my $file = shift;
 	open IN, $self->{'config'};
 	while(<IN>){
 		next if $_ =~ /^\s+$|^\#/;
 		chomp;
-		my $type = '';
-		my $r = GetOptionsFromString($_, "t|type=s" => \$type);
-		#Help("Line is not correctly formated\n$_") if !$r;
-		Help("Line does not contain type\n$_") if !$type;
-		push(@programs,new $type($_)) if $type ne 'SeqFile';
-		$self->{'seqs'} = new SeqFile($self->{'file'},$_) if $type eq 'SeqFile';
+		push(@programs,new Blast($_,$self));
 	}
 	
 	$self->{'programs'} = \@programs;

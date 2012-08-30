@@ -6,13 +6,7 @@ use Getopt::Long qw(GetOptionsFromString);
 
 sub new{
 	my $class = shift;
-	my $self;
-	my $f = shift;
-	my %opts = ();
-	my $line = shift;
-	my $r = GetOptionsFromString($line,\%opts,qw(prefix=s folder=s format=s chunk=i restart=f type=s));
-	$self = \%opts;
-	$self->{'file'} = $f;
+	my $self = shift;
 	bless $self,$class;
 	$self->Chunk if $self->{'chunk'};
 	push(@{$self->{'files'}},$self->{'file'}) if !$self->{'chunk'};
