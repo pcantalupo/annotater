@@ -9,6 +9,7 @@ sub new{
 	my $cutoffs = shift;
 	my %mm = ('outfmt',6,
 				'num_threads', 4);
+	$mm{'num_threads'} = $cutoffs->{'num_threads'};
 	my $r = GetOptionsFromString($options,\%mm,qw(exec=s type=s num_threads=i db=s max_target_seqs=i evalue=s),
 									qw(f_evalue=s pid=i qc=i));
 	$self = \%mm;
