@@ -45,6 +45,9 @@ sub run{
 		}	
 		$p = 0;
 	}	
+	foreach my $f(@files){
+		RM($f);	
+	}
 }
 sub Restart{
 	my $self = shift;
@@ -94,6 +97,17 @@ sub Copy{
 	else{
 		$cmd = join(' ','cp',@_);
 	}
+	`$cmd`;
+}
+sub RM{
+	my $cmd;
+	my $f = shift;
+	if($^O eq 'MSWin32'){
+		$cmd = "del ".$f;
+	}
+	else{
+		$cmd = "rm ".$f;
+	}	
 	`$cmd`;
 }
 sub Overwrite{
