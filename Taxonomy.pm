@@ -327,7 +327,7 @@ sub gi2lineage {
       eval { @lineage = taxid2lineage($taxid); };   # taxid2lineage from this module
    } while ($@);
 
-   if ($lineage =~ /^Empty id list/) {
+   if ($lineage[0] =~ /^Empty id list/) {
       print STDERR $_, "\tError: No Lineage found, empty id list\n";
       return "";
    }
