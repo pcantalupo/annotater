@@ -23,19 +23,6 @@ while (<>) {
   $family = "";
   $species = "";
   $genome = "";
-  
-  if ($lineage eq "") {
-    print STDERR "Can't get taxonomy from local database...attempting to get it remotely from NCBI\n";
-    
-    $lineage = gi2lineage($gi);
-    
-    unless ($lineage) {
-      print STDERR "Can't get lineage from $gi\n";
-      next;
-    }
-    
-    sleep 1;   # or sleep 10;    
-  } 
 
   ($type, $family, $species) = lineage2tfs($lineage);
   $genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
