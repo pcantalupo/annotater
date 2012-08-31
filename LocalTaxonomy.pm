@@ -48,6 +48,11 @@ sub Load{
 		}
 	}
 }
+
+
+# Tries to get taxonomy lineage from local installation of taxonomy db
+# but if it fails, then it sends query to NCBI (gi2lineage subroutine)
+#
 sub GetLineage{
 	my($self,$type,$gi) = @_;
 	my $taxid;
@@ -68,6 +73,7 @@ sub GetLineage{
 
 	if ($lineage[0] eq "") {
 		@lineage = gi2lineage($gi);
+		sleep 1;
 	}
 	
 	return join("; ", @lineage);
