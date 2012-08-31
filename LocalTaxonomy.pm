@@ -4,6 +4,7 @@ use warnings;
 use Bio::LITE::Taxonomy;
 use Bio::LITE::Taxonomy::NCBI;
 use Bio::LITE::Taxonomy::NCBI::Gi2taxid;
+use Taxonomy;
 
 sub new{
 	my $class = shift;
@@ -64,6 +65,11 @@ sub GetLineage{
 	}
 	my $get = $self->{'dict'};
 	my @lineage =  $get->get_taxonomy($taxid);
+
+	if ($lineage[0] eq "") {
+		@lineage = gi2lineage($gi);
+	}
+	
 	return join("; ", @lineage);
 }
 
