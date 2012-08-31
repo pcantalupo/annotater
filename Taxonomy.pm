@@ -120,6 +120,7 @@ $VERSION     = 1.00;
 @ISA         = qw(Exporter);
 @EXPORT      = qw(gi2taxid
                   taxid2lineage
+                  gi2lineage
                   accession2gi
                   lineage2tfs
                   get_virus_family
@@ -308,6 +309,8 @@ sub gi2lineage {
    my ($gi) = @_;
    return undef unless ($gi);
 
+   my $lineage = "";
+   
    my $taxid;
    do {
       undef $@;
@@ -328,6 +331,8 @@ sub gi2lineage {
       print STDERR $_, "\tError: No Lineage found, empty id list\n";
       return "";
    }
+
+   return $lineage;
 }
 
 
