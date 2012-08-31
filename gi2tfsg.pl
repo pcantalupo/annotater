@@ -27,31 +27,14 @@ while (<>) {
   if ($lineage eq "") {
     print STDERR "Can't get taxonomy from local database...attempting to get it remotely from NCBI\n";
     
-    my $taxid;
-    do {
-      undef $@;
-      eval { $taxid = gi2taxid($gi); };   # Taxonomy.pm
-    } while ($@);
+    $lineage = gi2lineage($gi);
     
-    unless (defined $taxid) {
-      print STDERR $_, "\tError: No Taxid found\n";
+    unless ($lineage) {
+      print STDERR "Can't get lineage from $gi\n";
       next;
     }
     
-    do {
-      undef $@;
-      eval { $lineage = taxid2lineage($taxid); };    # Taxonomy.pm
-    } while ($@);
-
-    if ($lineage =~ /^Empty id list/) {
-      print STDERR $_, "\tError: No Lineage found, empty id list\n";
-      next;
-    } 
-
-    sleep 1;   # or sleep 10;
-    
-    #print "$_\t$gi\t$taxid\t$lineage\n";   
-
+    sleep 1;   # or sleep 10;    
   } 
 
   ($type, $family, $species) = lineage2tfs($lineage);
