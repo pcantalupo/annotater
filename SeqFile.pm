@@ -9,7 +9,11 @@ sub new{
 	my $self = shift;
 	bless $self,$class;
 	$self->Chunk if $self->{'chunk'};
-	push(@{$self->{'files'}},$self->{'file'}) if !$self->{'chunk'};
+	if(!$self->{'chunk'}){
+		my $f = join(".",$self->{'prefix'},0,$self->{'format'});
+		Copy($self->{'file'},$f);
+		push(@{$self->{'files'}},$f);
+	}
 	return $self;
 }
 sub Chunk{
@@ -68,6 +72,16 @@ sub PrintParams{
 	foreach my $k (keys %{$self}){
 		print join "\t", $k, $self->{$k},$/;	
 	}	
+}
+sub Copy{
+	my $cmd;	
+	if($^O eq 'MSWin32'){
+		$cmd = join(' ','copy',@_);	
+	}
+	else{
+		$cmd = join(' ','cp',@_);
+	}
+	`$cmd`;
 }
 1;
 

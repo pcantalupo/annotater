@@ -7,13 +7,12 @@ sub new{
 	my $self;
 	my $options = shift;
 	my $default = shift;
-	my %mm = ('outfmt',6,
-				'num_threads', 4);
+	my %mm;
 	$mm{'num_threads'} = $default->{'num_threads'};
 	$mm{'outfmt'} = $default->{'outfmt'};
 	$mm{'evalue'} = $default->{'evalue'};
-	my $r = GetOptionsFromString($options,\%mm,qw(exec=s type=s num_threads=i db=s max_target_seqs=i evalue=s),
-									qw(f_evalue=s pid=i qc=i));
+	my @keys = qw(exec=s type=s num_threads=i db=s max_target_seqs=i evalue=s f_evalue=s pid=i qc=i);
+	my $r = GetOptionsFromString($options,\%mm,@keys);
 	$self = \%mm;
 	bless $self,$class;
 	$self->{'cutoffs'} = $self->SetCutOffs($default);
@@ -24,8 +23,9 @@ sub new{
 sub Build{
 	my $self = shift;
 	my $command;
+	my $outfmt_s = $self->{'outfmt_s'};
 	my $outfmt = '-outfmt "6 '.join(' ',qw(qseqid sseqid pident length mismatch
-gapopen qstart qend sstart send evalue bitscore qlen)).'"';
+gapopen qstart qend sstart send evalue bitscore qlen)).' $outfmt_s"';
 	$command = join(' ',$self->{'exec'},'-show_gis',"-num_threads",
 		$self->{'num_threads'}, $outfmt,"-db",$self->{'db'});
 	$command = join(' ',$command,"-max_target_seqs",$self->{'max_target_seqs'}) if $self->{'max_target_seqs'};
