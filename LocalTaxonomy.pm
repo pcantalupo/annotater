@@ -4,6 +4,7 @@ use warnings;
 use Bio::LITE::Taxonomy;
 use Bio::LITE::Taxonomy::NCBI;
 use Bio::LITE::Taxonomy::NCBI::Gi2taxid;
+use Taxonomy;
 
 sub new{
 	my $class = shift;
@@ -47,6 +48,11 @@ sub Load{
 		}
 	}
 }
+
+
+# Tries to get taxonomy lineage from local installation of taxonomy db
+# but if it fails, then it sends query to NCBI (gi2lineage subroutine)
+#
 sub GetLineage{
 	my($self,$type,$gi) = @_;
 	my $taxid;
@@ -64,6 +70,12 @@ sub GetLineage{
 	}
 	my $get = $self->{'dict'};
 	my @lineage =  $get->get_taxonomy($taxid);
+
+	if ($lineage[0] eq "") {
+		@lineage = gi2lineage($gi);
+		sleep 1;
+	}
+	
 	return join("; ", @lineage);
 }
 

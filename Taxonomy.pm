@@ -120,6 +120,7 @@ $VERSION     = 1.00;
 @ISA         = qw(Exporter);
 @EXPORT      = qw(gi2taxid
                   taxid2lineage
+                  gi2lineage
                   accession2gi
                   lineage2tfs
                   get_virus_family
@@ -283,6 +284,54 @@ sub taxid2lineage {
       @lineage = ("phage", "Inoviridae", "Non-A, non-B hepatitis virus");
    }
    
+   return wantarray ? return @lineage : join("; ", @lineage);
+}
+
+
+=head2 gi2lineage
+
+ Title    : gi2lineage
+ Usage    : $lineage  = gi2lineage('965480');
+ Function : Returns the lineage of a GI. Acts as a wrapper around gi2taxid
+            and taxid2lineage
+ Returns  : List context: an array containing the lineage information from General to Specific
+            Scalar context: elements of the array are joined with '; ' (mind the space)
+
+            If cannot get Taxid or Lineage, returns "".
+            If argument to subroutine is NOT true (i.e. '', 0, undef), returns undef
+             
+ Args     : a GI number
+ 
+=cut
+
+
+sub gi2lineage {
+   my ($gi) = @_;
+   return undef unless ($gi);
+
+   my @lineage = ();
+   
+   my $taxid;
+   do {
+      undef $@;
+      eval { $taxid = gi2taxid($gi); };   # gi2taxid from this module
+   } while ($@);
+   
+   unless (defined $taxid) {
+      print STDERR $_, "\tError: No Taxid found\n";
+      return "";
+   }
+   
+   do {
+      undef $@;
+      eval { @lineage = taxid2lineage($taxid); };   # taxid2lineage from this module
+   } while ($@);
+
+   if ($lineage[0] =~ /^Empty id list/) {
+      print STDERR $_, "\tError: No Lineage found, empty id list\n";
+      return "";
+   }
+
    return wantarray ? return @lineage : join("; ", @lineage);
 }
 
