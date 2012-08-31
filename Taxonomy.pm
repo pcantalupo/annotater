@@ -287,6 +287,50 @@ sub taxid2lineage {
 }
 
 
+=head2 gi2lineage
+
+ Title    : gi2lineage
+ Usage    : $lineage  = gi2lineage(' ## CHANGE ME ## ');
+ Function : Returns the lineage of a GI
+ Returns  : scalar containing the lineage information from General to Specific
+            separated by '; ' (mind the space)
+ 
+            If cannot get Taxid or Lineage, returns "".
+            If argument to subroutine is NOT true (i.e. '', 0, undef), returns undef
+             
+ Args     : a GI number
+ 
+=cut
+
+
+sub gi2lineage {
+
+   my ($gi) = @_;
+   return undef unless ($gi);
+
+   my $taxid;
+   do {
+      undef $@;
+      eval { $taxid = gi2taxid($gi); };   # gi2taxid from this module
+   } while ($@);
+   
+   unless (defined $taxid) {
+      print STDERR $_, "\tError: No Taxid found\n";
+      return "";
+   }
+   
+   do {
+      undef $@;
+      eval { $lineage = taxid2lineage($taxid); };   # taxid2lineage from this module
+   } while ($@);
+
+   if ($lineage =~ /^Empty id list/) {
+      print STDERR $_, "\tError: No Lineage found, empty id list\n";
+      return "";
+   }
+}
+
+
 
 =head2 lineage2tfs
 
