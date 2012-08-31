@@ -291,11 +291,12 @@ sub taxid2lineage {
 =head2 gi2lineage
 
  Title    : gi2lineage
- Usage    : $lineage  = gi2lineage(' ## CHANGE ME ## ');
- Function : Returns the lineage of a GI
- Returns  : scalar containing the lineage information from General to Specific
-            separated by '; ' (mind the space)
- 
+ Usage    : $lineage  = gi2lineage('965480');
+ Function : Returns the lineage of a GI. Acts as a wrapper around gi2taxid
+            and taxid2lineage
+ Returns  : List context: an array containing the lineage information from General to Specific
+            Scalar context: elements of the array are joined with '; ' (mind the space)
+
             If cannot get Taxid or Lineage, returns "".
             If argument to subroutine is NOT true (i.e. '', 0, undef), returns undef
              
@@ -305,11 +306,10 @@ sub taxid2lineage {
 
 
 sub gi2lineage {
-
    my ($gi) = @_;
    return undef unless ($gi);
 
-   my $lineage = "";
+   my @lineage = ();
    
    my $taxid;
    do {
@@ -324,7 +324,7 @@ sub gi2lineage {
    
    do {
       undef $@;
-      eval { $lineage = taxid2lineage($taxid); };   # taxid2lineage from this module
+      eval { @lineage = taxid2lineage($taxid); };   # taxid2lineage from this module
    } while ($@);
 
    if ($lineage =~ /^Empty id list/) {
@@ -332,7 +332,7 @@ sub gi2lineage {
       return "";
    }
 
-   return $lineage;
+   return wantarray ? return @lineage : join("; ", @lineage);
 }
 
 
