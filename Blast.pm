@@ -11,8 +11,13 @@ sub new{
 	$mm{'num_threads'} = $default->{'num_threads'};
 	$mm{'outfmt'} = $default->{'outfmt'};
 	$mm{'evalue'} = $default->{'evalue'};
-	my @keys = qw(exec=s type=s num_threads=i db=s max_target_seqs=i evalue=s f_evalue=s pid=i qc=i);
-	my $r = GetOptionsFromString($options,\%mm,@keys);
+	my @reqs = qw(exec=s type=s num_threads=i db=s max_target_seqs=i evalue=s f_evalue=s pid=i qc=i);
+	my @opts = (qw(word_size=i gapopen=i gapextend=i matrix=s threshold=f comp_based_stats=s seg=s soft_masking),
+		qw(lcase_masking gilist=s seqidlist=s negative_gilist=s entrez_query=s db_soft_mask=s db_hard_mask=s),
+		qw(culling_limit=i best_hit_overhang=f best_hit_score_edge=f max_target_seqs=i dbsize=i searchsp=i),
+		qw(import_search_strategy=s export_search_strategy=s xdrop_ungap=f xdrop_gap=f xdrop_gap_final=f),
+		qw(window_size=i ungapped parse_deflines remote use_sw_tback));
+	my $r = GetOptionsFromString($options,\%mm,@reqs,@opts);
 	$self = \%mm;
 	bless $self,$class;
 	$self->{'cutoffs'} = $self->SetCutOffs($default);
@@ -22,14 +27,19 @@ sub new{
 }
 sub Build{
 	my $self = shift;
+	my %params;
 	my $command;
 	my $outfmt_s = $self->{'outfmt_s'};
-	my $outfmt = '-outfmt "6 '.join(' ',qw(qseqid sseqid pident length mismatch
-gapopen qstart qend sstart send evalue bitscore qlen)).' $outfmt_s"';
+	my $outfmt = '-outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen'." $outfmt_s\"";
 	$command = join(' ',$self->{'exec'},'-show_gis',"-num_threads",
 		$self->{'num_threads'}, $outfmt,"-db",$self->{'db'});
 	$command = join(' ',$command,"-max_target_seqs",$self->{'max_target_seqs'}) if $self->{'max_target_seqs'};
 	$command = join(' ',$command,"-evalue",$self->{'evalue'}) if defined($self->{'evalue'});
+	foreach my $o (keys %{$self}){
+		if(defined($self->{$o})){
+			$command = join(' ',$command,"-$o",$self->{$o});
+		}	
+	}
 	$self->{'command'} = $command;
 }
 sub run{
@@ -74,9 +84,6 @@ sub PrintParams{
 	foreach my $k (keys %{$self}){
 		print join "\t", $k, $self->{$k},$/;	
 	}	
-}
-sub TestOptions{
-	
 }
 sub Pass{
 	my $self = shift;
