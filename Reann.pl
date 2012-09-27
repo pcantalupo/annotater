@@ -15,14 +15,19 @@ my %h = ("num_threads",4,
 		"prefix","ann",
 		"format","fasta",
 		"evalue","1e-5",
-		"delim","\t");
-my @keys = qw(qc=f pid=f evalue=f num_threads=i folder=s file=s output=s chunk=i delim=s
-config=s restart=s outfmt=i prefix=s format=s outfmt_str=s);
+		"delim","\t",
+		"tax",0);
+my @keys = qw(qc=f pid=f evalue=f num_threads=i folder=s file=s output=s chunk=i delim=s config=s restart=s outfmt=i prefix=s format=s outfmt_str=s tax);
+
 my $r = GetOptions(\%h,@keys); 
 
 my $run = new Reann(\%h);
 $run->run;
 $run->Report;
+
+if ( $h{'tax'} ) {
+	$run->Taxonomy;
+}
 
 
 =pod

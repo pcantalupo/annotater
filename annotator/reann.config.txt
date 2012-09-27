@@ -1,2 +1,0 @@
--exec blastp.exe -db %NR%
--exec blastp.exe -db %NR% -evalue 1
