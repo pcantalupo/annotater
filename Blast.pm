@@ -38,7 +38,6 @@ sub Build{
 	$outfmt .= '"';
 	$command = join(' ',$self->{'exec'},'-show_gis',"-num_threads",
 		$self->{'num_threads'}, $outfmt,"-db",$self->{'db'});
-	$command = join(' ',$command,"-max_target_seqs",$self->{'max_target_seqs'}) if $self->{'max_target_seqs'};
 	$command = join(' ',$command,"-evalue",$self->{'evalue'}) if defined($self->{'evalue'});
 	foreach my $o (@{$self->{'params'}{'vals'}}){
 		$o =~ s/\=.+$//;
