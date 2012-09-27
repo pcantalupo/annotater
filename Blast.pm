@@ -21,7 +21,6 @@ sub new{
 	$self = \%mm;
 	bless $self,$class;
 	$self->{'cutoffs'} = $self->SetCutOffs($default);
-	$self->TestOptions();
 	$self->Build;
 	return $self;
 }
