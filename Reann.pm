@@ -22,7 +22,7 @@ sub new{
 		chomp;
 		push(@programs,new Blast($_,$self));
 	}
-	
+	close IN;
 	$self->{'programs'} = \@programs;
 	$self->{'out'} = ();
 	bless $self,$class;
@@ -142,7 +142,8 @@ sub Report{
 	}
 	open OUT, ">$out";
 	print OUT join($d,@h),$/;
-	my $seqI = new Bio::SeqIO(-file => $self->{'file'});
+	my $seqI = new Bio::SeqIO(-file => $self->{'file'},-format => $self->{'format'});
+	
 	while(my $seq = $seqI->next_seq){
 		my $i = $seq->id;
 		my $reportline = '';
@@ -152,8 +153,9 @@ sub Report{
 		print OUT join($d,$i,$seq->seq,$seq->length,$reportline),$/;
 	}
 	close OUT;
-	
+	$seqI = '';
 	RM($self->{'file'});
+
 }
 
 sub Taxonomy {

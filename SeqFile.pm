@@ -8,12 +8,12 @@ sub new{
 	my $class = shift;
 	my $self = shift;
 	bless $self,$class;
-	$self->Chunk if $self->{'chunk'};
-	if(!$self->{'chunk'}){
-		my $f = join(".",$self->{'prefix'},0,$self->{'format'});
-		Copy($self->{'file'},$f);
-		push(@{$self->{'files'}},$f);
-	}
+	$self->Chunk;
+	#if(!$self->{'chunk'}){
+	#	my $f = join(".",$self->{'prefix'},0,$self->{'format'});
+	#	Copy($self->{'file'},$f);
+	#	push(@{$self->{'files'}},$f);
+	#}
 	return $self;
 }
 sub Chunk{
@@ -23,15 +23,22 @@ sub Chunk{
 	my $seqO;
 	my @files;
 	my $seq;
+	if($self->{'chunk'} == 0){
+		my $f = join(".",$self->{'prefix'},$count,$self->{'format'});
+		$seqO = new Bio::SeqIO(-file => ">$f", -format => 'fasta');
+		push(@files,$f);
+	}
 	for(my $i = 0; $seq = $seqI->next_seq; $i++){
-		if((($i % ($self->{'chunk'})) == 0)){
+		if($self->{'chunk'} != 0 && (($i % ($self->{'chunk'})) == 0)){
 			my $file = join(".",$self->{'prefix'},$count,$self->{'format'});
 			$count++;
 			push(@files,$file);
-			$seqO = new Bio::SeqIO(-file => ">$file", -format => $self->{'format'});
+			$seqO = new Bio::SeqIO(-file => ">$file", -format => 'fasta');
 		}
 		$seqO->write_seq($seq);
 	}
+	$seqO = '';
+	$seqI = '';
 	$self->{'files'} = \@files;
 }
 sub GetFileCount{
