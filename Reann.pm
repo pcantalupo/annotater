@@ -45,6 +45,7 @@ sub run{
 		}	
 		$p = 0;
 	}	
+	$self->WriteRestart($i,$p);
 	foreach my $f(@files){
 		RM($f);	
 	}
