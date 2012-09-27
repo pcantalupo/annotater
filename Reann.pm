@@ -142,7 +142,7 @@ sub Report{
 	}
 	open OUT, ">$out";
 	print OUT join($d,@h),$/;
-	my $seqI = new Bio::SeqIO(-file => $self->{'file'},-format => $self->{'format'});
+	my $seqI = new Bio::SeqIO(-file => $self->{'file'});
 	while(my $seq = $seqI->next_seq){
 		my $i = $seq->id;
 		my $reportline = '';
