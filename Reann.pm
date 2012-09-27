@@ -150,6 +150,51 @@ sub Report{
 	}
 	close OUT;
 }
+
+sub Taxonomy {
+	my $self = shift;
+	print "taxonomy",$/;
+
+	# open report file, read header line and output it to taxout reportfile
+	my $report = $self->{'prefix'}.".".$self->{'output'};
+	open IN, "<", $report;
+	my $header = <IN>;
+	chomp $header;
+	my $taxout = $self->{'prefix'}.".wTax.".$self->{'output'};
+	open OUT, ">", $taxout;
+
+	print OUT join("\t",$header,"type","family","species","genome","lineage"),"\n";
+
+	use LocalTaxonomy;
+	use Taxonomy;
+
+	my $lt = new LocalTaxonomy;
+
+	while (<IN>) {
+		chomp;
+		my @fields = split /\t/, $_;
+
+		my $accession = $fields[6];
+		my $algo = $fields[7];
+
+		my $gi = (split (/\|/, $accession))[1];
+
+		# I should build a hash of gi2lineage to save results
+		my $lineage = $lt->GetLineage($algo, $gi);
+		my $type = "";
+		my $family = "";
+		my $species = "";
+		my $genome = "";
+		($type, $family, $species) = lineage2tfs($lineage);
+		$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
+
+		# I need to figure out how to get description
+		print OUT join ("\t", $_,$type,$family,$species,$genome,$lineage), "\n";
+	}
+
+	close OUT
+}
+
 1;
 
 =cut
