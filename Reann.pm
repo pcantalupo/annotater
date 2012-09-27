@@ -49,6 +49,8 @@ sub run{
 	foreach my $f(@files){
 		RM($f);	
 	}
+	
+	RM($self->{'config'});
 }
 sub Restart{
 	my $self = shift;
@@ -150,6 +152,8 @@ sub Report{
 		print OUT join($d,$i,$seq->seq,$seq->length,$reportline),$/;
 	}
 	close OUT;
+	
+	RM($self->{'file'});
 }
 
 sub Taxonomy {
