@@ -53,8 +53,8 @@ sub FilterSeqs{
 	my $self = shift;
 	my $i = shift;
 	my $filter = shift;
-	my $seqI = new Bio::SeqIO(-file => $self->{'files'}[$i], -format => $self->{'format'});	
-	my $seqO = new Bio::SeqIO(-file => ">".$self->{'files'}[$i].".temp",-format => $self->{'format'});
+	my $seqI = new Bio::SeqIO(-file => $self->{'files'}[$i], -format => 'fasta');	
+	my $seqO = new Bio::SeqIO(-file => ">".$self->{'files'}[$i].".temp",-format => 'fasta');
 	
 	while(my $seq = $seqI->next_seq){
 		$seqO->write_seq($seq) if !$filter->{$seq->id};	
