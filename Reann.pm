@@ -162,15 +162,20 @@ sub Taxonomy {
 	my $self = shift;
 	print "taxonomy",$/;
 
-	# open report file, read header line and output it to taxout reportfile
 	my $report = $self->{'prefix'}.".".$self->{'output'};
 	open IN, "<", $report;
+
 	my $header = <IN>;
 	chomp $header;
+	my @hf  = split (/\t/,$header);
+	my $nhf = scalar @hf;
+
 	my $taxout = $self->{'prefix'}.".wTax.".$self->{'output'};
 	open OUT, ">", $taxout;
 
-	print OUT join("\t",$header,"type","family","species","genome","lineage"),"\n";
+	print OUT join("\t", @hf[0..6],
+			"desc","type","family","species","genome",
+			@hf[7..$nhf-1]),"\n";
 
 	use LocalTaxonomy;
 	use Taxonomy;
@@ -179,11 +184,12 @@ sub Taxonomy {
 
 	while (<IN>) {
 		chomp;
-		my @fields = split /\t/, $_;
+		my @rf = split /\t/, $_;      # row fields (rf)
+		my $nrf = scalar @rf;
 
-		my $accession = $fields[6];
-		my $algo = $fields[7];
-		my $db = $fields[8];
+		my $accession = $rf[6];
+		my $algo = $rf[7];
+		my $db = $rf[8];
 
 		my $gi = (split (/\|/, $accession))[1];
 
@@ -196,14 +202,16 @@ sub Taxonomy {
 		($type, $family, $species) = lineage2tfs($lineage);
 		$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
 
-		# get description
+		# get description from BLAST database
 		use IO::String;
 		my $fasta = `blastdbcmd -db $db -entry $gi`;
 		my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
 		my $seqobj = $seqio->next_seq;
 
-		# I need to figure out how to get description
-		print OUT join ("\t", $_,$type,$family,$species,$genome,$lineage,$seqobj->desc), "\n";
+		# output
+		print OUT join ("\t", @rf[0..6],
+				$seqobj->desc,$type,$family,$species,$genome,
+				@rf[7..$nrf-1]),"\n";
 	}
 	close OUT;
 
