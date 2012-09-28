@@ -205,8 +205,10 @@ sub Taxonomy {
 		# I need to figure out how to get description
 		print OUT join ("\t", $_,$type,$family,$species,$genome,$lineage,$seqobj->desc), "\n";
 	}
+	close OUT;
 
-	close OUT
+	use File::Copy;
+	move ($taxout, $report);	
 }
 
 1;
