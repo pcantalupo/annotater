@@ -181,6 +181,7 @@ sub Taxonomy {
 
 		my $accession = $fields[6];
 		my $algo = $fields[7];
+		my $db = $fields[8];
 
 		my $gi = (split (/\|/, $accession))[1];
 
@@ -193,8 +194,14 @@ sub Taxonomy {
 		($type, $family, $species) = lineage2tfs($lineage);
 		$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
 
+		# get description
+		use IO::String;
+		my $fasta = `blastdbcmd -db $db -entry $gi`;
+		my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
+		my $seqobj = $seqio->next_seq;
+
 		# I need to figure out how to get description
-		print OUT join ("\t", $_,$type,$family,$species,$genome,$lineage), "\n";
+		print OUT join ("\t", $_,$type,$family,$species,$genome,$lineage,$seqobj->desc), "\n";
 	}
 
 	close OUT
