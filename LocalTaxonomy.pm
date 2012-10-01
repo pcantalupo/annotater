@@ -18,6 +18,7 @@ sub new{
 	$names = $ENV{'NAMESDMP'} if !(defined($names) && -e $names);
 	$nodes = $ENV{'NODESDMP'} if !(defined($nodes) && -e $nodes);
 	$self->{'dict'} = new Bio::LITE::Taxonomy::NCBI(db => 'NCBI', names => $names, nodes => $nodes);
+	$self->{'gi2lineage'} = ();
 	bless $self, $class;
 	return $self; 
 }
@@ -57,6 +58,13 @@ sub GetLineage{
 	my($self,$type,$gi) = @_;
 	my $taxid;
 	return 0 if !$type || !$gi;
+
+	# check if we have lineage saved for this gi
+	if (exists $self->{'gi2lineage'}{$gi}) {
+		return join ("; ", @{$self->{'gi2lineage'}{$gi}});
+	}
+	
+	# no lineage saved for this gi; therefore, go get it
 	if($type =~ /blast/i){
 		$type = AlgorithmToType($type);
 	}
@@ -75,6 +83,9 @@ sub GetLineage{
 		@lineage = gi2lineage($gi);
 		sleep 1;
 	}
+
+	# save gi and lineage information
+	$self->{'gi2lineage'}{$gi} = \@lineage;
 	
 	return join("; ", @lineage);
 }
