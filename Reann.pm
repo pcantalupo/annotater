@@ -4,7 +4,9 @@ use warnings;
 use Getopt::Long qw(GetOptionsFromString);
 use SeqFile;
 use Blast;
-
+use LocalTaxonomy;
+use Taxonomy;
+	
 sub new{
 	my $class = shift;
 	my $self = shift;
@@ -146,7 +148,7 @@ sub Report{
 	
 	while(my $seq = $seqI->next_seq){
 		my $i = $seq->id;
-		my $reportline = '';
+		my $reportline = "$d" x 10;
 		$reportline = join($d,$blast{$i}{'pid'},$blast{$i}{'coverage'},
 			$blast{$i}{'evalue'},$blast{$i}{'accession'},$blast{$i}{'algorithm'},
 			$blast{$i}{'db'},@{$blast{$i}{'pos'}}) if $blast{$i};
@@ -176,9 +178,6 @@ sub Taxonomy {
 	print OUT join("\t", @hf[0..6],
 			"desc","type","family","species","genome",
 			@hf[7..$nhf-1]),"\n";
-
-	use LocalTaxonomy;
-	use Taxonomy;
 
 	my $lt = new LocalTaxonomy;
 
