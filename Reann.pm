@@ -183,34 +183,34 @@ sub Taxonomy {
 
 	while (<IN>) {
 		chomp;
-		my @rf = split /\t/, $_;      # row fields (rf)
+		my @rf = split (/\t/, $_, -1);      # row fields (rf); -1 for keeping trailing empty fields
 		my $nrf = scalar @rf;
 
+		my ($desc, $type, $family, $species, $genome) = ('') x 5;
+
 		my $accession = $rf[6];
-		my $algo = $rf[7];
-		my $db = $rf[8];
+		unless ($accession eq "") {
+			my $gi = (split (/\|/, $accession))[1];
 
-		my $gi = (split (/\|/, $accession))[1];
+			my $algo = $rf[7];
+			my $lineage = $lt->GetLineage($algo, $gi);
+			($type, $family, $species) = lineage2tfs($lineage);
+			$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
 
-		# I should build a hash of gi2lineage to save results
-		my $lineage = $lt->GetLineage($algo, $gi);
-		my $type = "";
-		my $family = "";
-		my $species = "";
-		my $genome = "";
-		($type, $family, $species) = lineage2tfs($lineage);
-		$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
-
-		# get description from BLAST database
-		use IO::String;
-		my $fasta = `blastdbcmd -db $db -entry $gi`;
-		my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
-		my $seqobj = $seqio->next_seq;
-
+			# get description from BLAST database
+			my $db = $rf[8];
+			use IO::String;
+			my $fasta = `blastdbcmd -db $db -entry $gi`;
+			my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
+			my $seqobj = $seqio->next_seq;
+			$desc = $seqobj->desc;
+		}
+		
 		# output
 		print OUT join ("\t", @rf[0..6],
-				$seqobj->desc,$type,$family,$species,$genome,
+				$desc,$type,$family,$species,$genome,
 				@rf[7..$nrf-1]),"\n";
+
 	}
 	close OUT;
 
