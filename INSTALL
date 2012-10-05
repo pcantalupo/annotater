@@ -1,0 +1,49 @@
+########################
+Modules needed
+########################
+Bio::LITE::Taxonomy
+Bio::LITE::Taxonomy::NCBI
+Bio::LITE::Taxonomy::NCBI::Gi2taxid
+IO::String
+URI
+HTTP::Request
+XML::Simple
+
+plus other dependencies
+
+
+#######################
+Environmental variables
+#######################
+BLASTDB - directory of blast databases
+
+NGT - /path/to/gi_taxid_nucl.bin
+PGT - /path/to/gi_taxid_prot.bin
+NAMESDMP - /path/to/names.dmp
+NODESDMP - /path/to/nodes.dmp
+
+Add the Annotator folder to your PATH and PERL5LIB.
+
+
+################
+Taxonomy database
+################
+
+# get new Taxonomy files
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_nucl.dmp.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_prot.dmp.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxcat.tar.gz &
+
+# unzip each GZ file
+for file in *gz; do echo $file; gunzip $file; done
+
+# untar the tar archives
+tar xvf taxcat.tar
+tar xvf taxdump.tar
+
+# remove GZ archives
+rm -f *gz
+
+# convert DMP file to BIN file for Bio::LITE::Taxonomy::NCBI::Gi2taxid module
+makebin.pl &
