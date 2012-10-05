@@ -1,15 +1,17 @@
 ########################
 Modules needed
 ########################
+Bioperl - see bioperl.org
+
+Bio::DB::EUtilities
+
 Bio::LITE::Taxonomy
 Bio::LITE::Taxonomy::NCBI
 Bio::LITE::Taxonomy::NCBI::Gi2taxid
 IO::String
-URI
-HTTP::Request
 XML::Simple
 
-plus other dependencies
+plus other dependencies like URI, HTTP::Request, ...
 
 
 #######################
