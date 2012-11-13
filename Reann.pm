@@ -1,4 +1,5 @@
 package Reann;
+use 5.010;
 use strict;
 use warnings;
 use Getopt::Long qw(GetOptionsFromString);
@@ -6,16 +7,46 @@ use SeqFile;
 use Blast;
 use LocalTaxonomy;
 use Taxonomy;
+
+my $NUMTHREADS  = 4;
+my $OUTFOLDER   = 'annotator';
+my $BLASTOUTFMT = 6;
+my $RESTARTFILE = 'restart.txt';
+my $CHUNK       = 0;
+my $SEQFILE     = 'test.fa';
+my $CONFIGFILE  = 'reann.config.txt';
+my $OUTPUTFILE  = 'report.txt';
+my $PREFIX      = 'ann';
+my $SEQFORMAT   = 'fasta';
+my $EVALUE      = 1e-5;
+my $DELIM       = "\t";
+my $RUNTAXONOMY = 0;
 	
 sub new{
 	my $class = shift;
 	my $self = shift;
 	my @programs;
-	my %seqFile = %{$self};
+
+	$self->{'num_threads'} //= $NUMTHREADS;
+	$self->{'outfmt'}      //= $BLASTOUTFMT;
+	$self->{'restart'}     //= $RESTARTFILE;
+	$self->{'chunk'}       //= $CHUNK;
+	$self->{'output'}      //= $OUTPUTFILE;
+	$self->{'prefix'}      //= $PREFIX;
+	$self->{'file'}        //= $SEQFILE;
+	$self->{'config'}      //= $CONFIGFILE;
+	$self->{'folder'}      //= $OUTFOLDER;
+	$self->{'format'}      //= $SEQFORMAT;
+	$self->{'evalue'}      //= $EVALUE;
+	$self->{'delim'}       //= $DELIM;
+	$self->{'tax'}         //= $RUNTAXONOMY;
+
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
 	Copy($self->{'config'},$self->{'folder'});
 	Copy($self->{'file'},$self->{'folder'});
 	chdir($self->{'folder'});
+	
+	my %seqFile = %{$self};
 	$self->{'seqs'} = new SeqFile(\%seqFile);
 	my $file = shift;
 	open IN, $self->{'config'};
@@ -162,6 +193,8 @@ sub Report{
 
 sub Taxonomy {
 	my $self = shift;
+	return unless $self->{'tax'};    # check to see if Taxonomy sub should be executed
+	
 	print "taxonomy",$/;
 
 	my $report = $self->{'prefix'}.".".$self->{'output'};
