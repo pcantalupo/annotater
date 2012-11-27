@@ -98,10 +98,9 @@ sub PrintParams{
 sub Pass{
 	my $self = shift;
 	my @cols = @_;	
-	
 	return 1 if($self->{'cutoffs'}{'evalue'} >= $cols[10]
 		&& $self->{'cutoffs'}{'pid'} <= $cols[2] 
-		&& $self->{'cutoffs'}{'coverage'} <= (100*($cols[3]/$cols[12])));
+		&& $self->{'cutoffs'}{'coverage'} <= (100*(($cols[7]-$cols[6])/$cols[12])));
 	return 0;
 }
 sub SetCutOffs{
