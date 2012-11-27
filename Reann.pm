@@ -11,14 +11,19 @@ sub new{
 	my $class = shift;
 	my $self = shift;
 	my @programs;
-	my %seqFile = %{$self};
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
+	my $f = $self->{'file'};
+	$f =~ s/^.+\\|^.+\///;
 	Copy($self->{'config'},$self->{'folder'});
 	Copy($self->{'file'},$self->{'folder'});
+	$self->{'file'}  = $f;
+	$self->{'config'} =~ s/^.+\\|^.+\///;
 	chdir($self->{'folder'});
+	my %seqFile = %{$self};
 	$self->{'seqs'} = new SeqFile(\%seqFile);
 	my $file = shift;
 	open IN, $self->{'config'};
+	print $self->{'config'},$/;
 	while(<IN>){
 		next if $_ =~ /^\s+$|^\#/;
 		chomp;
@@ -102,6 +107,7 @@ sub Copy{
 	else{
 		$cmd = join(' ','cp',@_);
 	}
+	#print $cmd,$/;
 	`$cmd`;
 }
 sub RM{
