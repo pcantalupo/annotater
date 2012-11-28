@@ -155,7 +155,7 @@ sub Report{
 	while(my $seq = $seqI->next_seq){
 		my $i = $seq->id;
 		my $reportline = "$d" x 9;      # HARD CODING!!! Be careful here
-		$reportline = join($d,$blast{$i}{'pid'},$blast{$i}{'coverage'},
+		$reportline = join($d,$blast{$i}{'pid'},$blast{$i}{'qc'},
 			$blast{$i}{'evalue'},$blast{$i}{'accession'},$blast{$i}{'algorithm'},
 			$blast{$i}{'db'},@{$blast{$i}{'pos'}}) if $blast{$i};
 		print OUT join($d,$i,$seq->seq,$seq->length,$reportline),$/;

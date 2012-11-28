@@ -98,9 +98,10 @@ sub PrintParams{
 sub Pass{
 	my $self = shift;
 	my @cols = @_;	
+	print join("\t", $self->{'cutoffs'}{'qc'}, (100*(($cols[7]-$cols[6])/$cols[12]))),$/;
 	return 1 if($self->{'cutoffs'}{'evalue'} >= $cols[10]
 		&& $self->{'cutoffs'}{'pid'} <= $cols[2] 
-		&& $self->{'cutoffs'}{'coverage'} <= (100*(($cols[7]-$cols[6])/$cols[12])));
+		&& $self->{'cutoffs'}{'qc'} <= (100*(($cols[7]-$cols[6])/$cols[12])));
 	return 0;
 }
 sub SetCutOffs{
@@ -109,10 +110,10 @@ sub SetCutOffs{
 	my %set = %{$cuts} if $cuts;
 	$set{'evalue'} = $self->{'evalue'} if defined($self->{'f_evalue'});
 	$set{'pid'} = $self->{'pid'} if defined($self->{'pid'});
-	$set{'coverage'} = $self->{'coverage'} if defined($self->{'coverage'});
+	$set{'qc'} = $self->{'qc'} if defined($self->{'qc'});
 	$set{'evalue'} = 10 if !defined($set{'evalue'});
 	$set{'pid'} = 0 if !defined($set{'pid'});
-	$set{'coverage'} = 0 if !defined($set{'coverage'});
+	$set{'qc'} = 0 if !defined($set{'qc'});
 	return \%set;
 }
 sub Parse{
@@ -138,7 +139,7 @@ sub ParseOutfmt{
 			$report->{$cols[0]}{'evalue'} = $cols[10];
 			$report->{$cols[0]}{'pid'} = $cols[2];	
 			$report->{$cols[0]}{'accession'} = $cols[1];
-			$report->{$cols[0]}{'coverage'} = (100*($cols[3]/$cols[12]));
+			$report->{$cols[0]}{'qc'} = (100*($cols[3]/$cols[12]));
 			$report->{$cols[0]}{'length'} = $cols[12];
 			$report->{$cols[0]}{'algorithm'} = $self->{'exec'};
 			$report->{$cols[0]}{'db'} = $self->{'db'};
