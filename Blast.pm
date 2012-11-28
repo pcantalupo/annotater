@@ -98,10 +98,10 @@ sub PrintParams{
 sub Pass{
 	my $self = shift;
 	my @cols = @_;	
-	print join("\t", $self->{'cutoffs'}{'qc'}, (100*(($cols[7]-$cols[6])/$cols[12]))),$/;
+	#print join("\t", $self->{'cutoffs'}{'qc'}, (100*(($cols[7]+1-$cols[6])/$cols[12]))),$/;
 	return 1 if($self->{'cutoffs'}{'evalue'} >= $cols[10]
 		&& $self->{'cutoffs'}{'pid'} <= $cols[2] 
-		&& $self->{'cutoffs'}{'qc'} <= (100*(($cols[7]-$cols[6])/$cols[12])));
+		&& $self->{'cutoffs'}{'qc'} <= (100*(($cols[7]+1-$cols[6])/$cols[12])));
 	return 0;
 }
 sub SetCutOffs{
@@ -139,7 +139,7 @@ sub ParseOutfmt{
 			$report->{$cols[0]}{'evalue'} = $cols[10];
 			$report->{$cols[0]}{'pid'} = $cols[2];	
 			$report->{$cols[0]}{'accession'} = $cols[1];
-			$report->{$cols[0]}{'qc'} = (100*($cols[3]/$cols[12]));
+			$report->{$cols[0]}{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
 			$report->{$cols[0]}{'length'} = $cols[12];
 			$report->{$cols[0]}{'algorithm'} = $self->{'exec'};
 			$report->{$cols[0]}{'db'} = $self->{'db'};
