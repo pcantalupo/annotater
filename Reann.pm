@@ -197,6 +197,7 @@ sub Taxonomy {
 		my $accession = $rf[6];
 		unless ($accession eq "") {
 			my $gi = (split (/\|/, $accession))[1];
+			next unless $gi;
 
 			my $algo = $rf[7];
 			my $lineage = $lt->GetLineage($algo, $gi);
