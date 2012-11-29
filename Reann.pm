@@ -204,12 +204,14 @@ sub Taxonomy {
 			$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
 
 			# get description from BLAST database
-			my $db = $rf[8];
-			use IO::String;
-			my $fasta = `blastdbcmd -db $db -entry $gi`;
-			my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
-			my $seqobj = $seqio->next_seq;
-			$desc = $seqobj->desc;
+			if ($gi) {
+				my $db = $rf[8];
+				use IO::String;
+				my $fasta = `blastdbcmd -db $db -entry $gi`;
+				my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
+				my $seqobj = $seqio->next_seq;
+				$desc = $seqobj->desc;
+			}
 		}
 		
 		# output
