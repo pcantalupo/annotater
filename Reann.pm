@@ -136,7 +136,7 @@ sub PrintParams{
 	my $self = shift;
 	$self->{'seqs'}->PrintParams;
 }	
-sub Report{
+sub Report{ # edit here to add get all
 	my $self = shift;
 	my @h = qw(seqID seq seqLength pid coverage e accession algorithm db qstart qend sstart ssend);
 	print "report",$/;
@@ -151,14 +151,33 @@ sub Report{
 	open OUT, ">$out";
 	print OUT join($d,@h),$/;
 	my $seqI = new Bio::SeqIO(-file => $self->{'file'},-format => $self->{'format'});
-	
-	while(my $seq = $seqI->next_seq){
-		my $i = $seq->id;
-		my $reportline = "$d" x 9;      # HARD CODING!!! Be careful here
-		$reportline = join($d,$blast{$i}{'pid'},$blast{$i}{'qc'},
-			$blast{$i}{'evalue'},$blast{$i}{'accession'},$blast{$i}{'algorithm'},
-			$blast{$i}{'db'},@{$blast{$i}{'pos'}}) if $blast{$i};
-		print OUT join($d,$i,$seq->seq,$seq->length,$reportline),$/;
+	if(!$self->{'report_all'}){
+		while(my $seq = $seqI->next_seq){
+			my $i = $seq->id;
+			my $reportline = "$d" x 9;      # HARD CODING!!! Be careful here
+			$reportline = join($d,$blast{$i}{'pid'},$blast{$i}{'qc'},
+				$blast{$i}{'evalue'},$blast{$i}{'accession'},$blast{$i}{'algorithm'},
+				$blast{$i}{'db'},@{$blast{$i}{'pos'}}) if $blast{$i};
+			print OUT join($d,$i,$seq->seq,$seq->length,$reportline),$/;
+		}
+	}
+	else{
+		#finish all report here
+		while(my $seq = $seqI->next_seq){
+			my $i = $seq->id;
+			my $reportline = "$d" x 9;
+			if(defined($blast{$i})){  
+				foreach my $b (@{$blast{$i}}){
+					$reportline = join($d,$b->{'pid'},$b->{'qc'},
+						$b->{'evalue'},$b->{'accession'},$b->{'algorithm'},
+						$b->{'db'},@{$b->{'pos'}});
+					print OUT join($d,$i,'',$seq->length,$reportline),$/;
+				}
+			}
+			else{
+				print OUT join($d,$i,'',$seq->length,$reportline),$/;
+			}
+		}
 	}
 	close OUT;
 	$seqI = '';

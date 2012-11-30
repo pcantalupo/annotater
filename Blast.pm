@@ -25,6 +25,7 @@ sub new{
 	$self->{'params'}{'reqs'} = \@reqs;
 	bless $self,$class;
 	$self->{'cutoffs'} = $self->SetCutOffs($default);
+	$self->{'cutoffs'}{'report_all'} = $default->{'report_all'};
 	$self->Build;
 	return $self;
 }
@@ -118,12 +119,40 @@ sub SetCutOffs{
 }
 sub Parse{
 	my $self = shift;
-	if($self->{'outfmt'}){
+	if($self->{'outfmt'} && !$self->{'cutoffs'}{'report_all'}){
 		$self->ParseOutfmt(@_);	
+	}
+	elsif($self->{'outfmt'} && $self->{'cutoffs'}{'report_all'}){
+		$self->ParseAllOutfmt(@_);
 	}
 	else{
 		
 	}
+}
+sub ParseAllOutfmt{
+	my $self = shift;
+	my $file = shift;
+	my $report = shift;
+	my $delim = $self->GetDelim;
+	open IN, $file;
+	while(<IN>){
+		chomp $_;
+		my @cols = split $delim, $_;
+		if($self->Pass(@cols)){
+			my %line;
+			$line{'evalue'} = $cols[10];
+			$line{'pid'} = $cols[2];
+			$line{'accession'} = $cols[1];
+			$line{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
+			$line{'length'} = $cols[12];
+			my @pos = @cols[6..9];
+			$line{'pos'} = \@pos;
+			my @mm  = (\%line);
+			push(@{$report->{$cols[0]}},@mm) if defined($report->{$cols[0]});
+			$report->{$cols[0]} = \@mm if !defined($report->{$cols[0]});
+		}
+	}
+	close IN;	
 }
 sub ParseOutfmt{
 	my $self = shift;

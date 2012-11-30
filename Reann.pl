@@ -9,15 +9,15 @@ my %h = ("num_threads",4,
 		"outfmt",6,
 		"restart",'restart.txt',
 		"chunk",10,
-		"file",".\\t\\random.fa",
-		"config",".\\t\\random.config.txt",
+		"file",".\\t\\tag-fasta.fa",
+		"config",".\\t\\tag.conf",
 		"output", "report.txt",
 		"prefix","ann",
 		"format","fasta",
-		"evalue","1e-5",
+		"evalue","10",
 		"delim","\t",
 		"tax",0);
-my @keys = qw(qc=f pid=f evalue=f num_threads=i folder=s file=s output=s chunk=i delim=s config=s restart=s outfmt=i prefix=s format=s outfmt_str=s tax);
+my @keys = qw(qc=f pid=f evalue=f num_threads=i folder=s file=s output=s chunk=i delim=s config=s restart=s outfmt=i prefix=s format=s outfmt_str=s report_all tax);
 
 my $r = GetOptions(\%h,@keys); 
 
