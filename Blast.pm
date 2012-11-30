@@ -143,6 +143,8 @@ sub ParseAllOutfmt{
 			$line{'evalue'} = $cols[10];
 			$line{'pid'} = $cols[2];
 			$line{'accession'} = $cols[1];
+			$line{'algorithm'} = $self->{'exec'};
+			$line{'db'} = $self->{'db'};
 			$line{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
 			$line{'length'} = $cols[12];
 			my @pos = @cols[6..9];
