@@ -1,0 +1,4 @@
+12.3.12
+Reann->Taxonomy method invokes a separate call to blastdbcmd for each gi.
+This is slow and should be changed to a batch call.
+
