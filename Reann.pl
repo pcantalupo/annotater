@@ -4,7 +4,6 @@ use warnings;
 use Getopt::Long;
 use Reann;
 
-<<<<<<< HEAD
 my $h = {};
 my @keys = qw(  qc=f pid=f evalue=f num_threads=i
 		folder=s file=s output=s chunk=i
