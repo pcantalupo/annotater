@@ -29,7 +29,6 @@ is( -s("ann.0.0.tblastx"), 8306, "tblastx output file size OK");
 $ra->Report;
 is( -e("ann.report.txt"),     1, "report file exists");
 
-$ra->Taxonomy;
 chdir("..");
 
 
@@ -51,8 +50,8 @@ is( -s("ann.0.0.tblastx"), 4402, "tblastx output file size OK");
 $ra->Report;
 is( -e("ann.report.txt"),     1, "report file exists");
 
-$ra->Taxonomy;
-is( -s("ann.report.txt"),   545, "taxonomy report file size OK");
+#$ra->Taxonomy;
+#is( -s("ann.report.txt"),   545, "taxonomy report file size OK");
 chdir("..");			
 
 
@@ -78,11 +77,12 @@ chdir("..");
 #
 mkdir("diffdir");
 chdir("diffdir");
-$ra = Reann->new( {'config' => '../tag.conf',
-                   'file'   => '../tag-fastq.fq',
-                   'folder' => 'diffdir-tag-fastq',
-                   'format' => 'fastq',
+$ra = Reann->new( {	'config' => '../tag.conf',
+                   	'file'   => '../tag-fastq.fq',
+                  	'folder' => 'diffdir-tag-fastq',
+                   	'format' => 'fastq',
                         'evalue' => '1e-5',
+			'report_all' => 1,
                   }
                 );
 $ra->run;
@@ -90,8 +90,7 @@ is( -d("../diffdir-tag-fastq"),   1, "output directory 'diffdir' exists");
 is( -s("ann.0.0.tblastx"),     4402, "tblastx output file size OK");
 
 $ra->Report;
-is( -e("ann.report.txt"),     1, "report file exists");
-
-$ra->Taxonomy;
+is( -e("ann.report.txt"),     1, "report file (with all hits) exists");
+is( -s("ann.report.txt"),  3695, "report file (with all hits) size");
 
 
