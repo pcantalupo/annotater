@@ -13,14 +13,15 @@ my $OUTFOLDER   = 'annotator';
 my $BLASTOUTFMT = 6;
 my $RESTARTFILE = 'restart.txt';
 my $CHUNK       = 0;
-my $SEQFILE     = 'test.fa';
-my $CONFIGFILE  = 'reann.config.txt';
+my $SEQFILE     = '.\\t\\tag-fasta.fa';
+my $CONFIGFILE  = '.\\t\\tag.conf';
 my $OUTPUTFILE  = 'report.txt';
 my $PREFIX      = 'ann';
 my $SEQFORMAT   = 'fasta';
-my $EVALUE      = 1e-5;
+my $EVALUE      = 10;
 my $DELIM       = "\t";
 my $RUNTAXONOMY = 0;
+my $REPORTALL   = 0;
 	
 sub new{
 	my $class = shift;
@@ -42,14 +43,19 @@ sub new{
 	$self->{'tax'}         //= $RUNTAXONOMY;
 
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
+	my $f = $self->{'file'};
+	$f =~ s/^.+\\|^.+\///;
 	Copy($self->{'config'},$self->{'folder'});
 	Copy($self->{'file'},$self->{'folder'});
+	$self->{'file'}  = $f;
+	$self->{'config'} =~ s/^.+\\|^.+\///;
 	chdir($self->{'folder'});
-	
+
 	my %seqFile = %{$self};
 	$self->{'seqs'} = new SeqFile(\%seqFile);
 	my $file = shift;
 	open IN, $self->{'config'};
+	print $self->{'config'},$/;
 	while(<IN>){
 		next if $_ =~ /^\s+$|^\#/;
 		chomp;
@@ -133,6 +139,7 @@ sub Copy{
 	else{
 		$cmd = join(' ','cp',@_);
 	}
+	#print $cmd,$/;
 	`$cmd`;
 }
 sub RM{
@@ -161,7 +168,7 @@ sub PrintParams{
 	my $self = shift;
 	$self->{'seqs'}->PrintParams;
 }	
-sub Report{
+sub Report{ # edit here to add get all
 	my $self = shift;
 	my @h = qw(seqID seq seqLength pid coverage e accession algorithm db qstart qend sstart ssend);
 	print "report",$/;
@@ -176,14 +183,33 @@ sub Report{
 	open OUT, ">$out";
 	print OUT join($d,@h),$/;
 	my $seqI = new Bio::SeqIO(-file => $self->{'file'},-format => $self->{'format'});
-	
-	while(my $seq = $seqI->next_seq){
-		my $i = $seq->id;
-		my $reportline = "$d" x 9;      # HARD CODING!!! Be careful here
-		$reportline = join($d,$blast{$i}{'pid'},$blast{$i}{'coverage'},
-			$blast{$i}{'evalue'},$blast{$i}{'accession'},$blast{$i}{'algorithm'},
-			$blast{$i}{'db'},@{$blast{$i}{'pos'}}) if $blast{$i};
-		print OUT join($d,$i,$seq->seq,$seq->length,$reportline),$/;
+	if(!$self->{'report_all'}){
+		while(my $seq = $seqI->next_seq){
+			my $i = $seq->id;
+			my $reportline = "$d" x 9;      # HARD CODING!!! Be careful here
+			$reportline = join($d,$blast{$i}{'pid'},$blast{$i}{'qc'},
+				$blast{$i}{'evalue'},$blast{$i}{'accession'},$blast{$i}{'algorithm'},
+				$blast{$i}{'db'},@{$blast{$i}{'pos'}}) if $blast{$i};
+			print OUT join($d,$i,$seq->seq,$seq->length,$reportline),$/;
+		}
+	}
+	else{
+		#finish all report here
+		while(my $seq = $seqI->next_seq){
+			my $i = $seq->id;
+			my $reportline = "$d" x 9;
+			if(defined($blast{$i})){  
+				foreach my $b (@{$blast{$i}}){
+					$reportline = join($d,$b->{'pid'},$b->{'qc'},
+						$b->{'evalue'},$b->{'accession'},$b->{'algorithm'},
+						$b->{'db'},@{$b->{'pos'}});
+					print OUT join($d,$i,'',$seq->length,$reportline),$/;
+				}
+			}
+			else{
+				print OUT join($d,$i,'',$seq->length,$reportline),$/;
+			}
+		}
 	}
 	close OUT;
 	$seqI = '';
@@ -231,12 +257,14 @@ sub Taxonomy {
 			$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
 
 			# get description from BLAST database
-			my $db = $rf[8];
-			use IO::String;
-			my $fasta = `blastdbcmd -db $db -entry $gi`;
-			my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
-			my $seqobj = $seqio->next_seq;
-			$desc = $seqobj->desc;
+			if ($gi) {
+				my $db = $rf[8];
+				use IO::String;
+				my $fasta = `blastdbcmd -db $db -entry $gi`;
+				my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
+				my $seqobj = $seqio->next_seq;
+				$desc = $seqobj->desc;
+			}
 		}
 		
 		# output

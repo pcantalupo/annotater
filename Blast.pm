@@ -25,6 +25,7 @@ sub new{
 	$self->{'params'}{'reqs'} = \@reqs;
 	bless $self,$class;
 	$self->{'cutoffs'} = $self->SetCutOffs($default);
+	$self->{'cutoffs'}{'report_all'} = $default->{'report_all'};
 	$self->Build;
 	return $self;
 }
@@ -98,10 +99,10 @@ sub PrintParams{
 sub Pass{
 	my $self = shift;
 	my @cols = @_;	
-	
+	#print join("\t", $self->{'cutoffs'}{'qc'}, (100*(($cols[7]+1-$cols[6])/$cols[12]))),$/;
 	return 1 if($self->{'cutoffs'}{'evalue'} >= $cols[10]
 		&& $self->{'cutoffs'}{'pid'} <= $cols[2] 
-		&& $self->{'cutoffs'}{'coverage'} <= (100*($cols[3]/$cols[12])));
+		&& $self->{'cutoffs'}{'qc'} <= (100*(($cols[7]+1-$cols[6])/$cols[12])));
 	return 0;
 }
 sub SetCutOffs{
@@ -110,20 +111,50 @@ sub SetCutOffs{
 	my %set = %{$cuts} if $cuts;
 	$set{'evalue'} = $self->{'evalue'} if defined($self->{'f_evalue'});
 	$set{'pid'} = $self->{'pid'} if defined($self->{'pid'});
-	$set{'coverage'} = $self->{'coverage'} if defined($self->{'coverage'});
+	$set{'qc'} = $self->{'qc'} if defined($self->{'qc'});
 	$set{'evalue'} = 10 if !defined($set{'evalue'});
 	$set{'pid'} = 0 if !defined($set{'pid'});
-	$set{'coverage'} = 0 if !defined($set{'coverage'});
+	$set{'qc'} = 0 if !defined($set{'qc'});
 	return \%set;
 }
 sub Parse{
 	my $self = shift;
-	if($self->{'outfmt'}){
+	if($self->{'outfmt'} && !$self->{'cutoffs'}{'report_all'}){
 		$self->ParseOutfmt(@_);	
+	}
+	elsif($self->{'outfmt'} && $self->{'cutoffs'}{'report_all'}){
+		$self->ParseAllOutfmt(@_);
 	}
 	else{
 		
 	}
+}
+sub ParseAllOutfmt{
+	my $self = shift;
+	my $file = shift;
+	my $report = shift;
+	my $delim = $self->GetDelim;
+	open IN, $file;
+	while(<IN>){
+		chomp $_;
+		my @cols = split $delim, $_;
+		if($self->Pass(@cols)){
+			my %line;
+			$line{'evalue'} = $cols[10];
+			$line{'pid'} = $cols[2];
+			$line{'accession'} = $cols[1];
+			$line{'algorithm'} = $self->{'exec'};
+			$line{'db'} = $self->{'db'};
+			$line{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
+			$line{'length'} = $cols[12];
+			my @pos = @cols[6..9];
+			$line{'pos'} = \@pos;
+			my @mm  = (\%line);
+			push(@{$report->{$cols[0]}},@mm) if defined($report->{$cols[0]});
+			$report->{$cols[0]} = \@mm if !defined($report->{$cols[0]});
+		}
+	}
+	close IN;	
 }
 sub ParseOutfmt{
 	my $self = shift;
@@ -139,7 +170,7 @@ sub ParseOutfmt{
 			$report->{$cols[0]}{'evalue'} = $cols[10];
 			$report->{$cols[0]}{'pid'} = $cols[2];	
 			$report->{$cols[0]}{'accession'} = $cols[1];
-			$report->{$cols[0]}{'coverage'} = (100*($cols[3]/$cols[12]));
+			$report->{$cols[0]}{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
 			$report->{$cols[0]}{'length'} = $cols[12];
 			$report->{$cols[0]}{'algorithm'} = $self->{'exec'};
 			$report->{$cols[0]}{'db'} = $self->{'db'};
