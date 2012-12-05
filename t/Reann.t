@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use File::Path qw(make_path remove_tree);
 use Test::More tests => 11;
 
 
@@ -18,7 +19,7 @@ chdir("t");    # enter the Test directory
 #
 # JOSH DEFAULT TEST
 #
-`rm -rf annotator`;
+remove_tree("annotator");
 my $ra = Reann->new( { 'chunk' => 10,
 		     }
 		   );
@@ -35,7 +36,7 @@ chdir("..");
 #
 # TAG FASTA
 #
-`rm -rf tag-fasta`;
+remove_tree("tag-fasta");
 $ra = Reann->new( {     'config' => 'tag.conf',
 			'file'   => 'tag-fasta.fa',
 			'folder' => 'tag-fasta',
@@ -58,7 +59,7 @@ chdir("..");
 #
 # TAG FASTQ
 #
-`rm -rf tag-fastq`;
+remove_tree("tag-fastq");
 $ra = Reann->new( {'config' => 'tag.conf',
                    'file'   => 'tag-fastq.fq',
                    'folder' => 'tag-fastq',
@@ -77,6 +78,7 @@ chdir("..");
 #
 mkdir("diffdir");
 chdir("diffdir");
+remove_tree("diffdir-tag-fastq");
 $ra = Reann->new( {	'config' => '../tag.conf',
                    	'file'   => '../tag-fastq.fq',
                   	'folder' => 'diffdir-tag-fastq',
@@ -92,5 +94,5 @@ is( -s("ann.0.0.tblastx"),     4402, "tblastx output file size OK");
 $ra->Report;
 is( -e("ann.report.txt"),     1, "report file (with all hits) exists");
 is( -s("ann.report.txt"),  3695, "report file (with all hits) size");
-
+chdir("../../");    # move up to t/ directory
 
