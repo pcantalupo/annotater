@@ -120,10 +120,10 @@ sub SetCutOffs{
 sub Parse{
 	my $self = shift;
 	if($self->{'outfmt'} && !$self->{'cutoffs'}{'report_all'}){
-		$self->ParseOutfmt(@_);	
+		return $self->ParseOutfmt(@_);	
 	}
 	elsif($self->{'outfmt'} && $self->{'cutoffs'}{'report_all'}){
-		$self->ParseAllOutfmt(@_);
+		return $self->ParseAllOutfmt(@_);
 	}
 	else{
 		
@@ -134,6 +134,7 @@ sub ParseAllOutfmt{
 	my $file = shift;
 	my $report = shift;
 	my $delim = $self->GetDelim;
+	my %idHash;
 	open IN, $file;
 	while(<IN>){
 		chomp $_;
@@ -143,6 +144,7 @@ sub ParseAllOutfmt{
 			$line{'evalue'} = $cols[10];
 			$line{'pid'} = $cols[2];
 			$line{'accession'} = $cols[1];
+			$idHash{$cols[1]} = 1;
 			$line{'algorithm'} = $self->{'exec'};
 			$line{'db'} = $self->{'db'};
 			$line{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
@@ -155,6 +157,7 @@ sub ParseAllOutfmt{
 		}
 	}
 	close IN;	
+	return \%idHash;
 }
 sub ParseOutfmt{
 	my $self = shift;
@@ -162,6 +165,7 @@ sub ParseOutfmt{
 	my $report = shift;
 	my $delim = $self->GetDelim;
 	open IN, $file;
+	my %idHash;
 	while(<IN>){
 		chomp $_;
 		my @cols = split $delim, $_;
@@ -170,6 +174,7 @@ sub ParseOutfmt{
 			$report->{$cols[0]}{'evalue'} = $cols[10];
 			$report->{$cols[0]}{'pid'} = $cols[2];	
 			$report->{$cols[0]}{'accession'} = $cols[1];
+			$idHash{$cols[1]} = 1;
 			$report->{$cols[0]}{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
 			$report->{$cols[0]}{'length'} = $cols[12];
 			$report->{$cols[0]}{'algorithm'} = $self->{'exec'};
@@ -179,6 +184,7 @@ sub ParseOutfmt{
 		}
 	}
 	close IN;
+	return \%idHash;
 }
 sub GetDelim{
 	my $self = shift;

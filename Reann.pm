@@ -175,10 +175,17 @@ sub Report{ # edit here to add get all
 	my $d = $self->{'delim'};
 	my %blast;
 	my $out = $self->{'prefix'}.".".$self->{'output'};
+	my @id_list;
 	for(my $x = 0; $x < scalar @{$self->{'out'}}; $x++){
 		for(my $y = 0; $y < scalar @{$self->{'out'}[$x]}; $y++){
-			$self->{'programs'}[$y]->Parse($self->{'out'}[$x][$y],\%blast);
+			push(@id_list,$self->{'programs'}[$y]->Parse($self->{'out'}[$x][$y],\%blast));
 		}	
+	}
+	foreach my $h (@id_list){
+		foreach my $k (keys %{$h}){
+			print $k,$/;
+			$self->{'hit_list'}{$k} = 1;
+		}
 	}
 	open OUT, ">$out";
 	print OUT join($d,@h),$/;
@@ -214,7 +221,6 @@ sub Report{ # edit here to add get all
 	close OUT;
 	$seqI = '';
 	RM($self->{'file'});
-
 }
 
 sub Taxonomy {
