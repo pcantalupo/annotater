@@ -3,6 +3,7 @@ use 5.010;
 use strict;
 use warnings;
 use Getopt::Long qw(GetOptionsFromString);
+use File::Copy;
 use SeqFile;
 use Blast;
 use LocalTaxonomy;
@@ -45,8 +46,8 @@ sub new{
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
 	my $f = $self->{'file'};
 	$f =~ s/^.+\\|^.+\///;
-	Copy($self->{'config'},$self->{'folder'});
-	Copy($self->{'file'},$self->{'folder'});
+	copy($self->{'config'},$self->{'folder'});
+	copy($self->{'file'},$self->{'folder'});
 	$self->{'file'}  = $f;
 	$self->{'config'} =~ s/^.+\\|^.+\///;
 	chdir($self->{'folder'});
@@ -130,17 +131,6 @@ sub WriteRestart{
 	print OUT join(",",@_),$/;
 	close OUT;
 	$self->Overwrite($self->{'restart'}.".temp",$self->{'restart'});
-}
-sub Copy{
-	my $cmd;	
-	if($^O eq 'MSWin32'){
-		$cmd = join(' ','copy',@_);	
-	}
-	else{
-		$cmd = join(' ','cp',@_);
-	}
-	#print $cmd,$/;
-	`$cmd`;
 }
 sub RM{
 	my $cmd;
@@ -281,7 +271,6 @@ sub Taxonomy {
 	}
 	close OUT;
 
-	use File::Copy;
 	move ($taxout, $report);	
 }
 

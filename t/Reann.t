@@ -55,7 +55,6 @@ is( -e("ann.report.txt"),     1, "report file exists");
 #is( -s("ann.report.txt"),   545, "taxonomy report file size OK");
 chdir("..");			
 
-
 #
 # TAG FASTQ
 #
