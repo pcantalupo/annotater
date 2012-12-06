@@ -358,17 +358,15 @@ sub lineage2tfs {
    my $lineage = shift;  
    return undef unless ($lineage);
 
-   my @taxa = split (/; /, $lineage);
-   
-   my $k       = $taxa[0];
-   my $species = $taxa[-1];
+   my @taxa = split (/; /, $lineage);   
+   my $species     = $taxa[-1];
 
    # Improperly classified agents list
    return ("phage", "Inoviridae", "Non-A, non-B hepatitis virus")
             if $species eq "Non-A, non-B hepatitis virus";
 
    # Check for Virus or Phage
-   if ($k =~ /Viruses/i || $k =~ /Viroids/i) {
+   if ($taxa[0] =~ /Viruses/i || $taxa[0] =~ /Viroids/i) {
       my $PHAGE = "phage";
       my $type = "virus";   # default to virus unless we prove it is a phage
 
@@ -379,9 +377,11 @@ sub lineage2tfs {
                $species);
    }  
 
-   # Check for Bacteria
-   if ($k eq "Bacteria" || $k eq "Archaea") {
+   # Check for Bacteria/Archaea
+   if ($taxa[1] eq "Bacteria") {
       return ("bacteria", $NOFAMILY, $species);
+   } elsif ($taxa[1] eq "Archaea") {
+      return ("archaea", $NOFAMILY, $species);
    }
      
    # Check for Human and Fungi
