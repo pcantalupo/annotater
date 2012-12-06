@@ -4,30 +4,18 @@ use warnings;
 use Getopt::Long;
 use Reann;
 
-my %h = ("num_threads",4,
-		"folder","annotator",
-		"outfmt",6,
-		"restart",'restart.txt',
-		"chunk",10,
-		"file",".\\t\\tag-fasta.fa",
-		"config",".\\t\\tag.conf",
-		"output", "report.txt",
-		"prefix","ann",
-		"format","fasta",
-		"evalue","10",
-		"delim","\t",
-		"tax",0);
-my @keys = qw(qc=f pid=f evalue=f num_threads=i folder=s file=s output=s chunk=i delim=s config=s restart=s outfmt=i prefix=s format=s outfmt_str=s report_all tax);
+my $h = {};
+my @keys = qw(  qc=f pid=f evalue=f num_threads=i
+		folder=s file=s output=s chunk=i
+		delim=s config=s restart=s outfmt=i
+		prefix=s format=s outfmt_str=s tax report_all);
+GetOptions($h,@keys); 
 
-my $r = GetOptions(\%h,@keys); 
-
-my $run = new Reann(\%h);
+my $run = new Reann($h);
 $run->run;
 $run->Report;
+$run->Taxonomy;
 
-if ( $h{'tax'} ) {
-	$run->Taxonomy;
-}
 
 
 =pod

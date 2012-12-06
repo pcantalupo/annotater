@@ -1,4 +1,5 @@
 package Reann;
+use 5.010;
 use strict;
 use warnings;
 use Getopt::Long qw(GetOptionsFromString);
@@ -6,11 +7,41 @@ use SeqFile;
 use Blast;
 use LocalTaxonomy;
 use Taxonomy;
+
+my $NUMTHREADS  = 4;
+my $OUTFOLDER   = 'annotator';
+my $BLASTOUTFMT = 6;
+my $RESTARTFILE = 'restart.txt';
+my $CHUNK       = 0;
+my $SEQFILE     = 'tag-fasta.fa';
+my $CONFIGFILE  = 'tag.conf';
+my $OUTPUTFILE  = 'report.txt';
+my $PREFIX      = 'ann';
+my $SEQFORMAT   = 'fasta';
+my $EVALUE      = 10;
+my $DELIM       = "\t";
+my $RUNTAXONOMY = 0;
+my $REPORTALL   = 0;
 	
 sub new{
 	my $class = shift;
 	my $self = shift;
 	my @programs;
+
+	$self->{'num_threads'} //= $NUMTHREADS;
+	$self->{'outfmt'}      //= $BLASTOUTFMT;
+	$self->{'restart'}     //= $RESTARTFILE;
+	$self->{'chunk'}       //= $CHUNK;
+	$self->{'output'}      //= $OUTPUTFILE;
+	$self->{'prefix'}      //= $PREFIX;
+	$self->{'file'}        //= $SEQFILE;
+	$self->{'config'}      //= $CONFIGFILE;
+	$self->{'folder'}      //= $OUTFOLDER;
+	$self->{'format'}      //= $SEQFORMAT;
+	$self->{'evalue'}      //= $EVALUE;
+	$self->{'delim'}       //= $DELIM;
+	$self->{'tax'}         //= $RUNTAXONOMY;
+
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
 	my $f = $self->{'file'};
 	$f =~ s/^.+\\|^.+\///;
@@ -19,6 +50,7 @@ sub new{
 	$self->{'file'}  = $f;
 	$self->{'config'} =~ s/^.+\\|^.+\///;
 	chdir($self->{'folder'});
+
 	my %seqFile = %{$self};
 	$self->{'seqs'} = new SeqFile(\%seqFile);
 	my $file = shift;
@@ -187,6 +219,8 @@ sub Report{ # edit here to add get all
 
 sub Taxonomy {
 	my $self = shift;
+	return unless $self->{'tax'};    # check to see if Taxonomy sub should be executed
+	
 	print "taxonomy",$/;
 
 	my $report = $self->{'prefix'}.".".$self->{'output'};
