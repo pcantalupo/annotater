@@ -43,6 +43,7 @@ sub new{
 	$self->{'delim'}       //= $DELIM;
 	$self->{'tax'}         //= $RUNTAXONOMY;
 
+	umask 0022;
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
 	my $f = $self->{'file'};
 	$f =~ s/^.+\\|^.+\///;
