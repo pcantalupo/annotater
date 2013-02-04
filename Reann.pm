@@ -259,7 +259,7 @@ sub Taxonomy {
 		while (my $seqobj = $seqio->next_seq) {
 			$acc{$db}{$seqobj->primary_id} = $seqobj->desc;
 		}
-		#unlink($gis_outfile, $fasta_outfile)
+		unlink($gis_outfile, $fasta_outfile);
 	}
 	
 	#
