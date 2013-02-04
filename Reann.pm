@@ -8,6 +8,7 @@ use SeqFile;
 use Blast;
 use LocalTaxonomy;
 use Taxonomy;
+use IO::String;
 
 my $NUMTHREADS  = 4;
 my $OUTFOLDER   = 'annotator';
@@ -235,8 +236,38 @@ sub Taxonomy {
 			"desc","type","family","species","genome",
 			@hf[7..$nhf-1]),"\n";
 
-	my $lt = new LocalTaxonomy;
+	#
+	# get fasta seqs and descriptions from BLAST databases 
+	my %acc;
+	while (<IN>) {		
+		my ($acc, $db) = (split (/\t/, $_, -1))[6,8];
+		$acc{$db}{$acc}++ unless ($acc eq "");
+	}
+	foreach my $db (keys %acc) {
+		print "\tGetting fasta seqs for $db\n";
+		my $gis_outfile = "$db.gis.txt";
+		open (TMPOUT, ">", $gis_outfile);
+		foreach (keys %{$acc{$db}}) {
+			print TMPOUT $_, "\n";
+		}
+		close TMPOUT;
+	
+		my $fasta_outfile = $gis_outfile . ".fa";
+		`blastdbcmd -db $db -entry_batch $gis_outfile > $fasta_outfile`;
 
+		my $seqio = Bio::SeqIO->new(-file => $fasta_outfile, -format => 'fasta');
+		while (my $seqobj = $seqio->next_seq) {
+			$acc{$db}{$seqobj->primary_id} = $seqobj->desc;
+		}
+		#unlink($gis_outfile, $fasta_outfile)
+	}
+	
+	#
+	# get lineage information
+	print "\tStarting LocalTaxonomy\n";
+	my $lt = new LocalTaxonomy;
+	seek IN, 0, 0;                  # seek to beginning of report file
+	<IN>;
 	while (<IN>) {
 		chomp;
 		my @rf = split (/\t/, $_, -1);      # row fields (rf); -1 for keeping trailing empty fields
@@ -256,14 +287,10 @@ sub Taxonomy {
 				$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
 			}
 			
-			# get description from BLAST database
+			# get description from %acc hash
 			if ($gi) {
 				my $db = $rf[8];
-				use IO::String;
-				my $fasta = `blastdbcmd -db $db -entry $gi`;
-				my $seqio = Bio::SeqIO->new(-fh => IO::String->new($fasta), -format => 'fasta');
-				my $seqobj = $seqio->next_seq;
-				$desc = $seqobj->desc;
+				$desc = $acc{$db}{$accession};
 			}
 		}
 		
@@ -275,7 +302,7 @@ sub Taxonomy {
 	}
 	close OUT;
 
-	move ($taxout, $report);	
+#	move ($taxout, $report);	
 }
 
 1;
