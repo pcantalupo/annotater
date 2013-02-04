@@ -246,13 +246,16 @@ sub Taxonomy {
 
 		my $accession = $rf[6];
 		unless ($accession eq "") {
+			($type, $family, $species, $genome) = ('NULL') x 4;
 			my $gi = (split (/\|/, $accession))[1];
 
 			my $algo = $rf[7];
 			my $lineage = $lt->GetLineage($algo, $gi);
-			($type, $family, $species) = lineage2tfs($lineage);
-			$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
-
+			if ($lineage ne "") {
+				($type, $family, $species) = lineage2tfs($lineage);
+				$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
+			}
+			
 			# get description from BLAST database
 			if ($gi) {
 				my $db = $rf[8];

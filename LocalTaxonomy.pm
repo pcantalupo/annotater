@@ -54,6 +54,9 @@ sub Load{
 # Tries to get taxonomy lineage from local installation of taxonomy db
 # but if it fails, then it sends query to NCBI (gi2lineage subroutine)
 #
+# Return value: scalar (taxonomy levels separated by '; ') or empty
+#		string if lineage could not be obtained for GI number
+#
 sub GetLineage{
 	my($self,$type,$gi) = @_;
 	my $taxid;
@@ -76,17 +79,27 @@ sub GetLineage{
 		my $d = $self->Load("prot");
 		$taxid = $d->get_taxid($gi);
 	}
-	my $get = $self->{'dict'};
-	my @lineage =  $get->get_taxonomy($taxid);
-
-	if ($lineage[0] eq "") {
+	
+	my @lineage = ();
+	
+	# if we dont' get a taxid, get lineage from NCBI
+	if (!defined $taxid || $taxid == 0) {
+		print STDERR "GetLineage: didn't get valid taxid:<$taxid> for GI:$gi so getting lineage from NCBI\n";
 		@lineage = gi2lineage($gi);
-		sleep 1;
+	}
+	# else, get it from LOCAL taxonomy database
+	else {
+		my $get = $self->{'dict'};
+		@lineage =  $get->get_taxonomy($taxid);
+		if ($lineage[0] eq "") {
+			print STDERR "GetLineage: cannot get lineage from local taxonomy even with valid taxid:<$taxid> for GI:$gi\n";
+		}
 	}
 
 	# save gi and lineage information
 	$self->{'gi2lineage'}{$gi} = \@lineage;
 	
+	#print STDERR "Lineage is ", join ("; ", @lineage), " for GI:$gi and Taxid:$taxid\n";
 	return join("; ", @lineage);
 }
 
