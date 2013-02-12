@@ -109,6 +109,7 @@ The rest of the documentation details each of the object methods. Internal metho
 
 package Taxonomy;
 use strict;
+use warnings;
 
 use Bio::DB::EUtilities;
 use XML::Simple;
@@ -161,7 +162,7 @@ sub accession2gi {
    # &retmode=text&id=gb%7CJ02400.1%7C&rettype=gi&tool=BioPerl&email=pcantalupo%40gmail.com"
 
    my ($acc) = @_; 
-   return undef unless ($acc);
+   return unless ($acc);
 
    my $factory = Bio::DB::EUtilities->new(-eutil => 'efetch',
                                           -db => 'nucleotide',  # don't need to change this to Protein for protein accessions, it seems to work fine by keeping it set to 'nucleotide'
@@ -195,7 +196,7 @@ sub gi2taxid {
    # example gi 965480 (SV40 J02400) -> taxid = 10633
 
    my ($gi, $database) = @_;
-   return undef unless ($gi);
+   return unless ($gi);
    
    $database ||= "nucleotide";
  
@@ -213,9 +214,8 @@ sub gi2taxid {
             return $item->get_content;
          }
       }
-            
-      return undef;    # No item called 'TaxID' existed in the XML document.
    }
+   return;    # No item called 'TaxID' existed in the XML document or no DocSums in factory
 }
 
 
@@ -243,7 +243,7 @@ sub taxid2lineage {
    # id=10633&email=pcantalupo%40gmail.com&retmode=xml 
    
    my ($id) = @_;
-   return undef unless ($id);
+   return unless ($id);
    
    my $factory = Bio::DB::EUtilities->new(-eutil => 'efetch',
                                           -db    => 'taxonomy',
@@ -307,7 +307,7 @@ sub taxid2lineage {
 
 sub gi2lineage {
    my ($gi) = @_;
-   return undef unless ($gi);
+   return unless ($gi);
 
    my @lineage = ();
    
@@ -356,7 +356,7 @@ sub gi2lineage {
 
 sub lineage2tfs {
    my $lineage = shift;  
-   return undef unless ($lineage);
+   return unless ($lineage);
 
    my @taxa = split (/; /, $lineage);   
    my $species     = $taxa[-1];
@@ -494,6 +494,9 @@ To be done...
 =cut
 
 sub is_phage_family {
+   my $family = shift;   
+   return unless ($family);
+
    my @PHAGEFAMS = qw/Bicaudaviridae
                         Caudovirales
                         Corticoviridae
@@ -512,8 +515,6 @@ sub is_phage_family {
                         Siphoviridae
                         Tectiviridae/;
 
-   my $family = shift;   
-   return undef unless ($family);
 
    foreach (@PHAGEFAMS) {
       return 1 if ($_ eq ucfirst $family);
@@ -534,6 +535,9 @@ To be done...
 =cut
 
 sub get_genome_type {
+   my $family = shift;
+   return unless ($family);
+
    my $UNKNOWN = "Unknown";
 
    my %vf2genome = (Adenoviridae => 'dsDNA,linear,nonsegmented',
@@ -607,8 +611,6 @@ sub get_genome_type {
                   Virgaviridae => 'ssRNA(+),linear,nonsegmented',
                );
 
-   my $family = shift @_;
-   return undef unless ($family);
    
    return $vf2genome{$family} if (exists $vf2genome{$family});
    
