@@ -497,8 +497,10 @@ sub is_phage_family {
    my $family = shift;   
    return unless ($family);
 
-   my @PHAGEFAMS = qw/Bicaudaviridae
+   my @PHAGEFAMS = qw/  Ampullaviridae
+                        Bicaudaviridae
                         Caudovirales
+                        Clavaviridae
                         Corticoviridae
                         Cystoviridae
                         Fuselloviridae
@@ -510,6 +512,7 @@ sub is_phage_family {
                         Microviridae
                         Myoviridae
                         Plasmaviridae
+                        Pleolipoviridae
                         Podoviridae
                         Rudiviridae
                         Siphoviridae
