@@ -58,7 +58,7 @@ sub Load{
 #		string if lineage could not be obtained for GI number
 #
 sub GetLineage{
-	my($self,$type,$gi) = @_;
+	my($self,$type,$gi,$remotetax) = @_;
 	my $taxid;
 	return 0 if !$type || !$gi;
 
@@ -68,34 +68,38 @@ sub GetLineage{
 	}
 	
 	# no lineage saved for this gi; therefore, go get it
-	if($type =~ /blast/i){
-		$type = AlgorithmToType($type);
-	}
-	if("nucleotide" =~ $type){
-		my $d = $self->Load("nucl");
-		$taxid = $d->get_taxid($gi);
-	}
-	if("protein" =~ $type){
-		my $d = $self->Load("prot");
-		$taxid = $d->get_taxid($gi);
-	}
-	
 	my @lineage = ();
-	
-	# if we dont' get a taxid, get lineage from NCBI
-	if (!defined $taxid || $taxid == 0) {
-		print STDERR "GetLineage: didn't get valid taxid:<$taxid> for GI:$gi so getting lineage from NCBI\n";
+	if ($remotetax) {   # get taxonomy information from NCBI
 		@lineage = gi2lineage($gi);
-	}
-	# else, get it from LOCAL taxonomy database
-	else {
-		my $get = $self->{'dict'};
-		@lineage =  $get->get_taxonomy($taxid);
-		if ($lineage[0] eq "") {
-			print STDERR "GetLineage: cannot get lineage from local taxonomy even with valid taxid:<$taxid> for GI:$gi\n";
+		sleep 1;
+	} else {
+		if($type =~ /blast/i){
+			$type = AlgorithmToType($type);
+		}
+		if("nucleotide" =~ $type){
+			my $d = $self->Load("nucl");
+			$taxid = $d->get_taxid($gi);
+		}
+		if("protein" =~ $type){
+			my $d = $self->Load("prot");
+			$taxid = $d->get_taxid($gi);
+		}
+		
+		# if we dont' get a taxid, get lineage from NCBI
+		if (!defined $taxid || $taxid == 0) {
+			print STDERR "GetLineage: didn't get valid taxid:<$taxid> for GI:$gi so getting lineage from NCBI\n";
+			@lineage = gi2lineage($gi);
+		}
+		# else, get it from LOCAL taxonomy database
+		else {
+			my $get = $self->{'dict'};
+			@lineage =  $get->get_taxonomy($taxid);
+			if ($lineage[0] eq "") {
+				print STDERR "GetLineage: cannot get lineage from local taxonomy even with valid taxid:<$taxid> for GI:$gi\n";
+			}
 		}
 	}
-
+	
 	# save gi and lineage information
 	$self->{'gi2lineage'}{$gi} = \@lineage;
 	

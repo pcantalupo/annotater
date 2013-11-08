@@ -7,9 +7,9 @@ use Reann;
 my $h = {};
 my @keys = qw(  qc=f pid=f evalue=f num_threads=i
 		folder=s file=s output=s chunk=i
-		delim=s config=s restart=s outfmt=i
-		prefix=s format=s outfmt_str=s tax report_all);
-GetOptions($h,@keys); 
+		delim=s config=s outfmt=i
+		prefix=s format=s outfmt_str=s tax report_all remotetax);
+GetOptions($h,@keys) or exit;
 
 my $run = new Reann($h);
 $run->run;

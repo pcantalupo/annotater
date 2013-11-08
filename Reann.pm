@@ -24,6 +24,7 @@ my $EVALUE      = 10;
 my $DELIM       = "\t";
 my $RUNTAXONOMY = 0;
 my $REPORTALL   = 0;
+my $REMOTETAX   = 0;
 	
 sub new{
 	my $class = shift;
@@ -43,6 +44,7 @@ sub new{
 	$self->{'evalue'}      //= $EVALUE;
 	$self->{'delim'}       //= $DELIM;
 	$self->{'tax'}         //= $RUNTAXONOMY;
+	$self->{'remotetax'}   //= $REMOTETAX;
 
 	umask 0022;
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
@@ -219,7 +221,7 @@ sub Taxonomy {
 	my $self = shift;
 	return unless $self->{'tax'};    # check to see if Taxonomy sub should be executed
 	
-	print "taxonomy",$/;
+	print "Taxonomy",$/;
 
 	my $report = $self->{'prefix'}.".".$self->{'output'};
 	open IN, "<", $report;
@@ -264,7 +266,11 @@ sub Taxonomy {
 	
 	#
 	# get lineage information
-	print "\tStarting LocalTaxonomy\n";
+	print "\tStarting LocalTaxonomy - ";
+	($self->{remotetax}) ?
+		print "getting taxonomy solely from NCBI\n" :
+		print "getting taxonomy locally\n";
+		
 	my $lt = new LocalTaxonomy;
 	seek IN, 0, 0;                  # seek to beginning of report file
 	<IN>;
@@ -281,7 +287,7 @@ sub Taxonomy {
 			my $gi = (split (/\|/, $accession))[1];
 
 			my $algo = $rf[7];
-			my $lineage = $lt->GetLineage($algo, $gi);
+			my $lineage = $lt->GetLineage($algo, $gi, $self->{'remotetax'});
 			if ($lineage ne "") {
 				($type, $family, $species) = lineage2tfs($lineage);
 				$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
