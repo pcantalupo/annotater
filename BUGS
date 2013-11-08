@@ -1,4 +1,18 @@
-12.3.12
+Bugs
+
+Nov 2012
+I tried running Reann with Taxonomy on the set of sewage sequences and I got
+the following error that I have not been able to fix:
+
+  perl(85839) malloc: *** mmap(size=2043740160) failed (error code=12)
+  *** error: can't allocate region
+  *** set a breakpoint in malloc_error_break to debug
+  Out of memory!
+
+
+
+Finished
+12.3.12 (fixed in Feb 2012 on commit c4a4d5d540028)
 Reann->Taxonomy method invokes a separate call to blastdbcmd for each gi.
 This is slow and should be changed to a batch call.
 
