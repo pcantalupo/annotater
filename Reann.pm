@@ -170,7 +170,7 @@ sub PrintParams{
 sub Report{ # edit here to add get all
 	my $self = shift;
 	my @h = qw(seqID seq seqLength pid coverage e accession algorithm db qstart qend sstart ssend);
-	print "report",$/;
+	print "Report",$/;
 	my $d = $self->{'delim'};
 	my %blast;
 	my $out = $self->{'prefix'}.".".$self->{'output'};
@@ -182,7 +182,6 @@ sub Report{ # edit here to add get all
 	}
 	foreach my $h (@id_list){
 		foreach my $k (keys %{$h}){
-			print $k,$/;
 			$self->{'hit_list'}{$k} = 1;
 		}
 	}
