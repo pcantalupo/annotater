@@ -45,6 +45,11 @@ sub new{
 	$self->{'delim'}       //= $DELIM;
 	$self->{'tax'}         //= $RUNTAXONOMY;
 	$self->{'remotetax'}   //= $REMOTETAX;
+	
+	if (! -e $self->{config}) {
+		print "Please supply an appropriate config file (config)\n";
+		exit;
+	}
 
 	umask 0022;
 	mkdir $self->{'folder'} if ! -d $self->{'folder'};
