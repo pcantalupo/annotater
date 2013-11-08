@@ -99,10 +99,9 @@ sub PrintParams{
 sub Pass{
 	my $self = shift;
 	my @cols = @_;	
-	#print join("\t", $self->{'cutoffs'}{'qc'}, (100*(($cols[7]+1-$cols[6])/$cols[12]))),$/;
 	return 1 if($self->{'cutoffs'}{'evalue'} >= $cols[10]
 		&& $self->{'cutoffs'}{'pid'} <= $cols[2] 
-		&& $self->{'cutoffs'}{'qc'} <= (100*(($cols[7]+1-$cols[6])/$cols[12])));
+		&& $self->{'cutoffs'}{'qc'} <= abs (100*(($cols[7]+1-$cols[6])/$cols[12])));
 	return 0;
 }
 sub SetCutOffs{
@@ -147,7 +146,7 @@ sub ParseAllOutfmt{
 			$idHash{$cols[1]} = 1;
 			$line{'algorithm'} = $self->{'exec'};
 			$line{'db'} = $self->{'db'};
-			$line{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
+			$line{'qc'} = abs (100*(($cols[7]+1-$cols[6])/$cols[12]));
 			$line{'length'} = $cols[12];
 			my @pos = @cols[6..9];
 			$line{'pos'} = \@pos;
@@ -175,7 +174,7 @@ sub ParseOutfmt{
 			$report->{$cols[0]}{'pid'} = $cols[2];	
 			$report->{$cols[0]}{'accession'} = $cols[1];
 			$idHash{$cols[1]} = 1;
-			$report->{$cols[0]}{'qc'} = (100*(($cols[7]+1-$cols[6])/$cols[12]));
+			$report->{$cols[0]}{'qc'} = abs (100*(($cols[7]+1-$cols[6])/$cols[12]));
 			$report->{$cols[0]}{'length'} = $cols[12];
 			$report->{$cols[0]}{'algorithm'} = $self->{'exec'};
 			$report->{$cols[0]}{'db'} = $self->{'db'};
