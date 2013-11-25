@@ -1,3 +1,9 @@
 .DS_Store
 annotator/*
-t/*/
+t/diffdir/
+t/random/
+t/sewageseqs/
+t/tag-fasta/
+t/tag-fastq/
+t/tmp/
+t/annotator/
