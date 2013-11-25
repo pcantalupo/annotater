@@ -2,9 +2,16 @@
 use strict;
 use warnings;
 use SeqUtils;
+use Getopt::Long;
 
-my $header = <>;
-print $header;
+my $header = 0;
+GetOptions("header|h" => \$header,
+          );
+
+if ($header) {
+  my $h = <>;
+  print $h;
+}
 
 while (<>) {
   chomp;
