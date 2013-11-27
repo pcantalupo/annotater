@@ -252,14 +252,7 @@ sub taxid2lineage {
                                           );
 
    my $res = $factory->get_Response->content;
-   my $data = XMLin($res);
-
-   # build lineage array to match structure of the ORGANISM field in
-   # Genbank records (i.e.  Viruses; dsDNA viruses; Polyomaviridae, etc..)
-   # and the last element of the array will be the organism name (i.e. 
-   # species name)
-   my @lineage = ();
-   
+   my $data = XMLin($res);   
    if (!ref($data)) {
       # if a Tax id doesn't exist in the Taxonomy database, the string
       # "<ERROR>Empty id list - nothing todo</ERROR>" is returned and $data
@@ -267,24 +260,27 @@ sub taxid2lineage {
       # string value of $data back to caller who can deal with it
       return $data;   
    } 
-   
-   foreach my $taxa (@{ $data->{Taxon}->{LineageEx}->{Taxon} } ) {
-      # taxa is a hash with three keys ScientificName, TaxId, and Rank
-      # I'm only saving the ScientificName but possible extensions to this
-      # subroutine would be to return the TaxId and Rank as well.
-      push (@lineage, $taxa->{ScientificName});
+
+   # Lineage tag in XML has a value that matches structure of the ORGANISM
+   # field in Genbank records  (i.e.  Viruses; dsDNA viruses; Polyomaviridae,
+   # etc..). If there is no Lineage, the value is a HASH ref that points to an
+   # empty hash.
+   my $lineage;
+   unless (ref $data->{Taxon}->{Lineage}) {
+      $lineage = $data->{Taxon}->{Lineage};
    }
-   
-   # add the Species to the end of the Lineage array.
-   push (@lineage, $data->{Taxon}->{ScientificName});
+   # add the Species to the end of lineage.
+   $lineage = ($lineage) ?
+               join("; ", $lineage, $data->{Taxon}->{ScientificName} ) :
+               $data->{Taxon}->{ScientificName};
 
    # lineage for Non-A non-B hepatits virus is wrong so we need to change it
    # here
    if ($id == 12440) {
-      @lineage = ("phage", "Inoviridae", "Non-A, non-B hepatitis virus");
+      $lineage = join("; ", "phage", "Inoviridae", "Non-A, non-B hepatitis virus");
    }
    
-   return wantarray ? return @lineage : join("; ", @lineage);
+   return wantarray ? split(/; /, $lineage) : $lineage;
 }
 
 
