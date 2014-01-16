@@ -116,6 +116,13 @@ sub AlgorithmToType{
 		return "protein";
 	}
 }
+
+
+sub get_taxonomy {
+	my ($self, $taxid) = @_;
+	return $self->{dict}->get_taxonomy($taxid);
+}
+
 1;
 
 =head1 LocalTaxonomy
