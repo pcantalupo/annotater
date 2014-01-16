@@ -9,24 +9,47 @@ use Taxonomy;
 
 my $seqfile;
 my $blasttable;
-#my $format = 'fasta';
 my $algo = "blastx"; my $db = "nr";
 my $c_qcov = 13;    # column number for blast table 'qcovs'
 my $c_taxid =15;    # column number for blast table 'staxid' 
 my $c_king = 16;    # column number for blast table 'sskingdom'
 my $c_desc = 17;    # column number for blast table 'stitle'
-
+my $help = 0;
 
 GetOptions ("s|seqfile=s"    => \$seqfile,
             "b|blasttable=s" => \$blasttable,
-#            "f|format=s"     => \$format,
             "algo=s"         => \$algo,
             "db=s"           => \$db,
             "desc=i"         => \$c_desc,
             "qcov=i"         => \$c_qcov,
+            "taxid=i"        => \$c_taxid,
             "kingdom=i"      => \$c_king,
+            "help|h"         => \$help,
             );
+&usage if ($help);
 die "Please supply a sequence file (s|seqfile) and blast table (outfmt 6; b|blasttable)" if (!$seqfile || !$blasttable);
+
+sub usage {
+  print <<HEREDOC;
+
+Usage: $0 -s QUERYSEQS -b BLASTTABLE
+
+    Optional args:
+        --algo    The BLAST flavor (i.e. blastx, etc...) (default blastx)
+        --db      The BLAST database used (default nr)
+        --qcov    Column num in table for the 'qcovs' field (default 13)
+        --taxid   Column num in table for the 'staxid' field (default 15)
+        --kingdom Column num in table for the 'sskingdom' field (default 16)
+        --desc    Column num in table for the 'stitle' field (default 17)
+
+    Converts a blast table (outfmt 6) that was created with the outfmt string:
+     -outfmt "6 std qcovs qcovhsp staxids sskingdoms stitle"
+    to Reann report format.
+
+HEREDOC
+exit;
+}
+
 
 my $seqio = Bio::SeqIO->new(-file => $seqfile);
 my %seqs;
