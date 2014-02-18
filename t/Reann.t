@@ -25,7 +25,8 @@ my $ra = Reann->new( { 'chunk' => 10,
 		   );
 $ra->run;
 is( -d("../annotator"),1, "output dir 'annotator' exists");
-is( -s("ann.0.0.tblastx"), 8306, "tblastx output file size OK"); 
+my $size = -s("ann.0.0.tblastx");
+ok( $size > 8300 && $size < 8310, "tblastx output file size OK"); 
 
 $ra->Report;
 is( -e("ann.report.txt"),     1, "report file exists");
@@ -43,16 +44,18 @@ $ra = Reann->new( {     'config' => 'tag.conf',
 			'format' => 'fasta',
 			'evalue' => '1e-5',
 			'tax'	 => 1,
+			'remotetax' => 1,
 			}
 		);
 $ra->run;
-is( -s("ann.0.0.tblastx"), 4402, "tblastx output file size OK");
+$size = -s("ann.0.0.tblastx");
+ok( $size > 4395 && $size < 4406, "tblastx output file size OK");
 
 $ra->Report;
 is( -e("ann.report.txt"),     1, "report file exists");
 
-#$ra->Taxonomy;
-#is( -s("ann.report.txt"),   545, "taxonomy report file size OK");
+$ra->Taxonomy;
+is( -s("ann.report.txt"),   551, "taxonomy report file size OK");
 chdir("..");			
 
 #
@@ -67,7 +70,8 @@ $ra = Reann->new( {'config' => 'tag.conf',
                   }
                 );
 $ra->run;
-is( -s("ann.0.0.tblastx"), 4402, "tblastx output file size OK");
+$size = -s("ann.0.0.tblastx");
+ok( $size > 4395 && $size < 4406, "tblastx output file size OK");
 chdir("..");
 
 
@@ -88,10 +92,11 @@ $ra = Reann->new( {	'config' => '../tag.conf',
                 );
 $ra->run;
 is( -d("../diffdir-tag-fastq"),   1, "output directory 'diffdir' exists");
-is( -s("ann.0.0.tblastx"),     4402, "tblastx output file size OK");
+$size = -s("ann.0.0.tblastx");
+ok( $size > 4395 && $size < 4406, "tblastx output file size OK");
 
 $ra->Report;
 is( -e("ann.report.txt"),     1, "report file (with all hits) exists");
-is( -s("ann.report.txt"),  3695, "report file (with all hits) size");
+is( -s("ann.report.txt"),  5555, "report file (with all hits) size");
 chdir("../../");    # move up to t/ directory
 
