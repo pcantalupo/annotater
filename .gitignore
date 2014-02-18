@@ -1,5 +1,4 @@
 .DS_Store
-annotator/*
 t/diffdir/
 t/random/
 t/sewageseqs/
