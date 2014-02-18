@@ -6,18 +6,28 @@ use Bio::LITE::Taxonomy::NCBI;
 use Bio::LITE::Taxonomy::NCBI::Gi2taxid;
 use Taxonomy;
 
+=head2 new
+
+Params  : hash with possible names:
+		remotetax       set to 1 to only perform remote taxonomy lookup at NCBI
+		gi_taxid_nucl   the gi_taxid_nucl BIN file
+		gi_taxid_prot   the gi_taxid_prot BIN file
+		names           NCBI taxonomy names file
+		nodes           NCBI taxonomy nodes file
+Usage   : 
+=cut
+
 sub new{
-	my $class = shift;
-	my $self;
-	$self->{'gi_taxid_nucl'} = shift;
-	$self->{'gi_taxid_prot'} = shift;
-	my $names = shift;
-	my $nodes = shift;
-	$self->{'gi_taxid_nucl'} = $ENV{'NGT'} if !(defined($self->{'gi_taxid_nucl'}) && -e $self->{'gi_taxid_nucl'});
-	$self->{'gi_taxid_prot'} = $ENV{'PGT'} if !(defined($self->{'gi_taxid_prot'}) && -e $self->{'gi_taxid_prot'});
-	$names = $ENV{'NAMESDMP'} if !(defined($names) && -e $names);
-	$nodes = $ENV{'NODESDMP'} if !(defined($nodes) && -e $nodes);
-	$self->{'dict'} = new Bio::LITE::Taxonomy::NCBI(db => 'NCBI', names => $names, nodes => $nodes);
+	my ($class, %args) = @_;
+	my $self = \%args;
+	$self->{'gi_taxid_nucl'} = $ENV{'NGT'}      if !(defined($self->{'gi_taxid_nucl'}) && -e $self->{'gi_taxid_nucl'});
+	$self->{'gi_taxid_prot'} = $ENV{'PGT'}      if !(defined($self->{'gi_taxid_prot'}) && -e $self->{'gi_taxid_prot'});
+	
+	unless (exists $self->{remotetax}) {
+		$self->{'names'} = $ENV{'NAMESDMP'} if !(defined($self->{names}) && -e $self->{names});
+		$self->{'nodes'} = $ENV{'NODESDMP'} if !(defined($self->{nodes}) && -e $self->{nodes});
+		$self->{'dict'} = new Bio::LITE::Taxonomy::NCBI(db => 'NCBI', names => $self->{names}, nodes => $self->{nodes});
+	}
 	$self->{'gi2lineage'} = ();
 	bless $self, $class;
 	return $self; 

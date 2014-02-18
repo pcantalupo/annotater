@@ -9,6 +9,7 @@ use Blast;
 use LocalTaxonomy;
 use Taxonomy;
 use IO::String;
+use SeqUtils;
 
 my $NUMTHREADS  = 4;
 my $OUTFOLDER   = 'annotator';
@@ -222,7 +223,7 @@ sub Report{ # edit here to add get all
 }
 
 sub Taxonomy {
-	my $self = shift;
+	my ($self, %args) = @_;
 	return unless $self->{'tax'};    # check to see if Taxonomy sub should be executed
 	
 	print "Taxonomy",$/;
@@ -240,7 +241,7 @@ sub Taxonomy {
 
 	print OUT join("\t", @hf[0..6],
 			"desc","type","family","species","genome",
-			@hf[7..$nhf-1]),"\n";
+			@hf[7..$nhf-1], "nsf"),"\n";
 
 	#
 	# get fasta seqs and descriptions from BLAST databases 
@@ -275,7 +276,7 @@ sub Taxonomy {
 		print "getting taxonomy solely from NCBI\n" :
 		print "getting taxonomy locally\n";
 		
-	my $lt = new LocalTaxonomy;
+	my $lt = ($self->{remotetax}) ? LocalTaxonomy->new(remotetax => 1) : LocalTaxonomy->new;
 	seek IN, 0, 0;                  # seek to beginning of report file
 	<IN>;
 	while (<IN>) {
@@ -304,16 +305,19 @@ sub Taxonomy {
 			}
 		}
 		
+		my $is_nsf = has_nsf($rf[1]);
+		
 		# output
 		print OUT join ("\t", @rf[0..6],
 				$desc,$type,$family,$species,$genome,
-				@rf[7..$nrf-1]),"\n";
+				@rf[7..$nrf-1], $is_nsf),"\n";
 
 	}
 	close OUT;
 
-#	move ($taxout, $report);	
+	unlink ($report);	
 }
+
 
 1;
 
