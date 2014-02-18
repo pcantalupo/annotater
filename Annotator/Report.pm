@@ -209,15 +209,21 @@ sub run_entropy {
 =cut
 
 sub pass_entropy {
-  my ($self, @args) = @_;
+  my ($self, %args) = @_;
   
-  unless ($self->{temp_entropyfile}) {
-    $self->run_entropy(@args);
+  unless ($self->{TEMP_ENTROPYFILE} || exists $args{use_report} ) {
+    $self->run_entropy(%args);
   }
-    
-  open (my $in, "<", $self->{$TEMP_ENTROPYFILE});
+  
+  my $fh;
+  if (exists $args{use_report}) {
+    open ($fh, "<", $self->{REPORT});    # Report file has entropy values
+  }
+  else {
+    open ($fh, "<", $self->{$TEMP_ENTROPYFILE});
+  }
   my $toReturn;
-  while (<$in>) {
+  while (<$fh>) {
     chomp;
     next if ($. == 1 && $self->{HEADER});    
     my @fields = split (/\t/, $_);
@@ -233,7 +239,7 @@ sub pass_entropy {
       push(@$toReturn, $_);
     }
   }
-  close ($in);
+  close ($fh);
   return $toReturn;
 }
 
