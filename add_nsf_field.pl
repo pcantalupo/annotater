@@ -10,7 +10,8 @@ GetOptions("header|h" => \$header,
 
 if ($header) {
   my $h = <>;
-  print $h;
+  chomp $h;
+  print $h, "\tnsf\n";
 }
 
 while (<>) {
