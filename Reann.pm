@@ -10,6 +10,7 @@ use LocalTaxonomy;
 use Taxonomy;
 use IO::String;
 use SeqUtils;
+use Annotator::Report;
 
 my $NUMTHREADS  = 4;
 my $OUTFOLDER   = 'annotator';
@@ -26,6 +27,7 @@ my $DELIM       = "\t";
 my $RUNTAXONOMY = 0;
 my $REPORTALL   = 0;
 my $REMOTETAX   = 0;
+
 	
 sub new{
 	my $class = shift;
@@ -236,8 +238,8 @@ sub Taxonomy {
 	my @hf  = split (/\t/,$header);
 	my $nhf = scalar @hf;
 
-	my $taxout = $self->{'prefix'}.".wTax.".$self->{'output'};
-	open OUT, ">", $taxout;
+	$self->{taxout} = $self->{'prefix'}.".wTax.".$self->{'output'};
+	open OUT, ">", $self->{taxout};
 
 	print OUT join("\t", @hf[0..6],
 			"desc","type","family","species","genome",
@@ -317,6 +319,25 @@ sub Taxonomy {
 
 	unlink ($report);	
 }
+
+sub add_entropy {
+  my ($self, %args) = @_;
+
+  my $viralrefseqs = "viral.1.1.genomic.fna";
+  my $entropyReport = $self->{prefix} . ".wTax.BE." . $self->{output};
+  if (-e $self->{taxout}) {
+    my $ar = Annotator::Report->new(report => $self->{taxout},
+                                    refseqs => "$ENV{BLASTDB}/$viralrefseqs",);
+    my $tmp = $ar->run_entropy;
+    move ($tmp, $entropyReport);
+    #move ($tmp, $self->{taxout});
+  }
+  else {
+    print "Add_entropy will not run since Reann taxReport does not exist.\n";
+    return
+  }
+}
+
 
 
 1;

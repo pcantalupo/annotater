@@ -201,6 +201,7 @@ sub run_entropy {
   }
   `$command`;
   ($self->{$TEMP_ENTROPYFH}, $self->{$TEMP_ENTROPYFILE}) = ($fh, $filename);
+  return $self->{$TEMP_ENTROPYFILE};
 }
 
 

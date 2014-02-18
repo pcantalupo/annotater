@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use File::Path qw(make_path remove_tree);
-use Test::More tests => 11;
+use Test::More; # tests => 12;
 
 
 # Various ways to say "ok"
@@ -55,8 +55,11 @@ $ra->Report;
 is( -e("ann.report.txt"),     1, "report file exists");
 
 $ra->Taxonomy;
-is( -s("ann.report.txt"),   551, "taxonomy report file size OK");
-chdir("..");			
+is( -s("ann.wTax.report.txt"),   551, "taxonomy report file size OK");
+
+$ra->add_entropy;
+is( -s("ann.wTax.BE.report.txt"), 594, "taxonomy report file with Entropy file size OK");
+chdir("..");
 
 #
 # TAG FASTQ
@@ -100,3 +103,5 @@ is( -e("ann.report.txt"),     1, "report file (with all hits) exists");
 is( -s("ann.report.txt"),  5555, "report file (with all hits) size");
 chdir("../../");    # move up to t/ directory
 
+
+done_testing();
