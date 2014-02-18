@@ -15,7 +15,7 @@ my $run = new Reann($h);
 $run->run;
 $run->Report;
 $run->Taxonomy;
-
+$run->add_entropy;
 
 
 =pod
