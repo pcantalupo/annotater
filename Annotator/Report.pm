@@ -223,7 +223,9 @@ sub pass_entropy {
   else {
     open ($fh, "<", $self->{$TEMP_ENTROPYFILE});
   }
+  
   my $toReturn;
+  my $ENT_MIN = 65; my $LC_MAX  = 50;
   while (<$fh>) {
     chomp;
     next if ($. == 1 && $self->{HEADER});    
@@ -232,9 +234,16 @@ sub pass_entropy {
     my @query_ent = ($fields[-4], $fields[-3]);
     my $shsp_ent = $fields[-2];
     my $shsp_lc  = $fields[-1];
-    if (   min(@query_ent) > 65
-        && ($shsp_ent == -1 || $shsp_ent  > 65)
-        && $shsp_lc < 50
+    if (
+            (    # unassigned sequence does not have a Qhsp_ent ($query_ent[1]) 
+              $query_ent[0] > $ENT_MIN && $query_ent[1] == -1
+            )    
+        || 
+            (    # for all hits that are not unassigned
+              min(@query_ent) > $ENT_MIN
+              && ($shsp_ent == -1 || $shsp_ent > $ENT_MIN)
+              && $shsp_lc < $LC_MAX
+            )
         )
     {
       push(@$toReturn, $_);
