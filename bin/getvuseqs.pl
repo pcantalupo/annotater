@@ -25,6 +25,8 @@ my ($qc, $pid, $evalue, $report);
 my @blast;
 my $blastfilter = 0;
 my $entropy = 0;
+my $suffix;
+my $delim = '|';
 GetOptions ("querycoverage|q=s" => \$qc,
             "percentid|p=s"     => \$pid,
             "evalue|e=s"        => \$evalue,
@@ -32,6 +34,8 @@ GetOptions ("querycoverage|q=s" => \$qc,
             "blastfilter|f"     => \$blastfilter,
             "report|r=s"        => \$report,
             "entropy|t"         => \$entropy,
+            "delim=s"           => \$delim,
+            "suffix|x=s"        => \$suffix,
             );
 die "Please supply report file (report|r)\n" if (!$report);
 die "Please supply blast output files (blast|b) since you have specified blastfiltering (-f)\n" if ($blastfilter && !@blast);
@@ -61,9 +65,13 @@ while (<$rpt>) {
   chomp;
   my ($id, $seq, $type) = split (/\t/, $_);
   
-  if ($blastfilter) {
+  if ($blastfilter && $type eq '') {
     next if $ab->passfilter($id);      # skip over those unassigned sequences that would pass the filter criteria
   }
   
-  print ">$id\n$seq\n";  
+  my $mm = '';
+  if ($suffix) {
+    $mm = $delim . $suffix;
+  } 
+  print ">$id$mm\n$seq\n"; 
 }
