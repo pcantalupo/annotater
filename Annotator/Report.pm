@@ -101,6 +101,7 @@ use strict;
 use warnings FATAL => 'all';
 use List::Util qw/min/;
 use File::Temp qw/tempfile/;
+use File::Spec;
 
 our (@SWITCHES, %OK_FIELD, %COLS, $AUTOLOAD);
 our $TEMP_ENTROPYFH = "temp_fh";
@@ -189,6 +190,10 @@ sub run_entropy {
     $self->$attr($value);
   }
 
+  if (exists $self->{REFSEQS}) {
+    $self->{REFSEQS} = File::Spec->canonpath( $self->{REFSEQS} ) # clean up path for Cygwin
+  }
+  
   unless ($self->{REFSEQS} && -e $self->{REFSEQS}) {
     $self->throw("Reference sequence file (refseqs => \$file) was not specified during method call or does not exist");
   }
