@@ -13,15 +13,16 @@ use Segmasker;
 # shsp_ent - entropy of the subject HSP sequence (only calculated for sequences found in viral.1.1.genomic.fna)
 # shsp_%lc - percent of low complexity (as determined by 'segmasker') residues in subject HSP sequence (only calculated for sequences found in viral.1.1.genomic.fna)
 
-my $refseqs = '';
+my $refseqs;
 my $header  = 0;
 my $increase_field_index = 0;
-GetOptions ('file|f=s'      => \$refseqs,
+GetOptions ('file|f=s%'      => \$refseqs,
             'header|h'      => \$header,
             'increase|i=i' => \$increase_field_index,
           ) or &usage;
-&usage if (!$refseqs || !-e $refseqs);
-
+foreach my $algo (keys %$refseqs) {
+  &usage if (!$refseqs->{$algo} || !-e $refseqs->{$algo});
+}
 my ($seq_col, $subjid_col, $db_col, $qs_col, $qe_col, $ss_col, $se_col) =
       map { $_ + $increase_field_index } (2,7,14,15,16,17,18);
 
@@ -29,13 +30,14 @@ sub usage {
 
   my $output=<<HEREDOC;
 
-$0 -f REFSEQS [-h -i]
+$0 -f BLASTDB=FILE [-f ...] [-h -i]
 
-  -f FILE      Reference sequence file (i.e. viral.1.1.genomic.fna) that was used for the TBX step
-  -h           The first row is the column names (default: no)
-  -i INT       Number of non-Annotator columns at the beginning of the file. This might occur if
-               you inserted an analysisID or other metagenome identifier in the first column. Therefore,
-               you would need to add '-i 1' to command line. This will increase the field indexes by 1
+  -f BLASTDB=FILE Specify fasta file for each blast database in the algorithm field. Format is:
+                  -f viral.1.1.genomic=/PATH/TO/SEQS.fna -f viral.1.protein=/PATH/TO/SEQS.faa
+  -h              The first row is the column names (default: no)
+  -i INT          Number of non-Annotator columns at the beginning of the file. This might occur if
+                  you inserted an analysisID or other metagenome identifier in the first column. Therefore,
+                  you would need to add '-i 1' to command line. This will increase the field indexes by 1
 
   
 HEREDOC
@@ -63,26 +65,34 @@ while (<>) {
   # Subject_hsp entropy
   my $shsp_ent = -1;
   my $shsp_perlc = -1;
-  if ($F[$db_col-1] eq 'viral.1.1.genomic' || $F[$db_col-1] =~ /viralrefseq/i) {    # only going to get SubHSP_entropy for sequences in viralrefseq right now
-    my $s = ($ss, $se)[$ss >  $se];
-    my $e = ($ss, $se)[$ss <= $se];
 
-    my $tmp = faidxsubstr($refseqs, $subjid, $s, $e);
-    $tmp =~ s/^>.+?\n//;
-    $tmp =~ s/\n//g;
-    my $shsp_seqobj = Bio::Seq->new(-seq => $tmp);
-    $shsp_ent = entropy($shsp_seqobj->seq);
+  foreach my $algo (keys %$refseqs) {
+    if ($algo eq $F[$db_col-1]) { # only going to get SubHSP_entropy for sequences provided by user
+      my $s = ($ss, $se)[$ss >  $se];
+      my $e = ($ss, $se)[$ss <= $se];
 
-    my $shsp = '';
-    if ($ss > $se) {
-      # blast hit was on the reverse complement of subject
-      $shsp = $shsp_seqobj->revcom()->translate()->seq;
+      my $tmp = faidxsubstr($refseqs->{$algo}, $subjid, $s, $e);
+      $tmp =~ s/^>.+?\n//;
+      $tmp =~ s/\n//g;
+      my $shsp_seqobj = Bio::Seq->new(-seq => $tmp);
+
+      my $shsp = '';
+      if ($shsp_seqobj->alphabet eq 'dna') {
+        $shsp_ent = entropy($shsp_seqobj->seq);   # get nucleotide entropy for shsp
+
+        if ($ss > $se) {
+          # blast hit was on the reverse complement of subject
+          $shsp = $shsp_seqobj->revcom()->translate()->seq;
+        }
+        else {
+          $shsp = $shsp_seqobj->translate()->seq;
+        }
+      }
+      else {
+        $shsp = $shsp_seqobj->seq;
+      }
+      (undef, $shsp_perlc) = Segmasker->new()->run($shsp);   # get protein % low complexity
     }
-    else {
-      $shsp = $shsp_seqobj->translate()->seq;
-    }
-
-    (undef, $shsp_perlc) = Segmasker->new()->run($shsp);
   }
 
   print join("\t", @F); 
