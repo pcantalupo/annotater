@@ -323,11 +323,13 @@ sub Taxonomy {
 sub add_entropy {
   my ($self, %args) = @_;
 
-  my $viralrefseqs = "viral.1.1.genomic.fna";
+  my $refseqs = {"viral.1.protein"   => "$ENV{BLASTDB}/viral.1.protein.faa",
+                 "viral.1.1.genomic" => "$ENV{BLASTDB}/viral.1.1.genomic.fna"};
+  
   my $entropyReport = $self->{prefix} . ".wTax.BE." . $self->{output};
   if (-e $self->{taxout}) {
     my $ar = Annotator::Report->new(report => $self->{taxout},
-                                    refseqs => "$ENV{BLASTDB}/$viralrefseqs",);
+                                    refseqs => $refseqs,);
     my $tmp = $ar->run_entropy;
     move ($tmp, $entropyReport);
     #move ($tmp, $self->{taxout});
