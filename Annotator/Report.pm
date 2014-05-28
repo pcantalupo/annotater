@@ -190,17 +190,29 @@ sub run_entropy {
     $self->$attr($value);
   }
 
+  my $error = 0;
   if (exists $self->{REFSEQS}) {
-    $self->{REFSEQS} = File::Spec->canonpath( $self->{REFSEQS} ) # clean up path for Cygwin
+    foreach my $db (keys %{$self->{REFSEQS}}) {
+      if (!-e $self->{REFSEQS}{$db}) {
+        $error = 1;
+        last;
+      }
+      $self->{REFSEQS}{$db} = File::Spec->canonpath( $self->{REFSEQS}{$db} ) # clean up path for Cygwin
+    }
   }
-  
-  unless ($self->{REFSEQS} && -e $self->{REFSEQS}) {
-    $self->throw("Reference sequence file (refseqs => \$file) was not specified during method call or does not exist");
-  }
+  else {
+    $error = 1;
+  }  
+  $self->throw("Reference sequence file(s) (refseqs => {db => \$file, ...}) was not specified during method call or file(s) do not exist") if ($error);
 
   my ($fh, $filename) = tempfile();
+  print "temp file is $filename\n";
   my $header = ''; $header = '-h' if ($self->{HEADER});
-  my $command = "blastentropy.pl $header -f $self->{REFSEQS} $self->{REPORT} > $filename";
+  my @f_option;
+  foreach my $db (keys %{$self->{REFSEQS}}) {
+    push (@f_option, "-f $db=" . $self->{REFSEQS}{$db});
+  }
+  my $command = "blastentropy.pl $header @f_option $self->{REPORT} > $filename";
   if ($self->verbose) {
     print $command, "\n";
   }
