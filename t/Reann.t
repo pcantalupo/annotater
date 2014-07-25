@@ -1,7 +1,8 @@
 use strict;
 use warnings;
 use File::Path qw(make_path remove_tree);
-use Test::More; # tests => 12;
+use Test::File;
+use Test::More  tests => 13;
 
 
 # Various ways to say "ok"
@@ -16,25 +17,27 @@ BEGIN {
 
 chdir("t");    # enter the Test directory
 
+####################
 #
 # JOSH DEFAULT TEST
 #
+#
 remove_tree("annotator");
-my $ra = Reann->new( { 'chunk' => 10,
-		     }
-		   );
+
+my $ra = Reann->new( { 'chunk' => 10, });
 $ra->run;
-is( -d("../annotator"),1, "output dir 'annotator' exists");
+is( -d("../annotator"), 1,        "Default test - directory 'annotator' exists");
+
 my $size = -s("ann.0.0.tblastx");
-ok( $size > 8300 && $size < 8310, "tblastx output file size OK"); 
+ok( $size > 8300 && $size < 8310, "Default test - tblastx file size"); 
 
 $ra->Report;
-is( -e("ann.report.txt"),     1, "report file exists");
+is( -e("ann.report.txt"),     1,  "Default test - report file");
 
 chdir("..");
 
 
-#
+####################
 # TAG FASTA
 #
 remove_tree("tag-fasta");
@@ -49,19 +52,20 @@ $ra = Reann->new( {     'config' => 'tag.conf',
 		);
 $ra->run;
 $size = -s("ann.0.0.tblastx");
-ok( $size > 4395 && $size < 4406, "tblastx output file size OK");
+ok( $size > 4395 && $size < 4406,      "TAGFASTA: tblastx output file size");
 
 $ra->Report;
-is( -e("ann.report.txt"),     1, "report file exists");
+is( -e("ann.report.txt"),     1,       "TAGFASTA: report file exists");
 
 $ra->Taxonomy;
-is( -s("ann.wTax.report.txt"),   551, "taxonomy report file size OK");
+is( -s("ann.wTax.report.txt"),   551,  "TAGFASTA: taxonomy report file size");
 
 $ra->add_entropy;
-is( -s("ann.wTax.BE.report.txt"), 594, "taxonomy report file with Entropy file size OK");
+is( -s("ann.wTax.BE.report.txt"), 595, "TAGFASTA: taxonomy BE report file size");
 chdir("..");
 
-#
+
+####################
 # TAG FASTQ
 #
 remove_tree("tag-fastq");
@@ -74,12 +78,12 @@ $ra = Reann->new( {'config' => 'tag.conf',
                 );
 $ra->run;
 $size = -s("ann.0.0.tblastx");
-ok( $size > 4395 && $size < 4406, "tblastx output file size OK");
+ok( $size > 4395 && $size < 4406,      "TAG FASTQ: tblastx output file size");
 chdir("..");
 
 
 
-#
+##########################################################################
 # Test for when sequence file and config file are not in current directory
 #
 mkdir("diffdir");
@@ -94,14 +98,14 @@ $ra = Reann->new( {	'config' => '../tag.conf',
                   }
                 );
 $ra->run;
-is( -d("../diffdir-tag-fastq"),   1, "output directory 'diffdir' exists");
+is( -d("../diffdir-tag-fastq"),   1, "DIFFDIR: output directory 'diffdir' exists");
 $size = -s("ann.0.0.tblastx");
-ok( $size > 4395 && $size < 4406, "tblastx output file size OK");
+ok( $size > 4395 && $size < 4406,    "DIFFDIR: tblastx output file size OK");
 
 $ra->Report;
-is( -e("ann.report.txt"),     1, "report file (with all hits) exists");
-is( -s("ann.report.txt"),  5555, "report file (with all hits) size");
+is( -e("ann.report.txt"),     1,     "DIFFDIR: report file (with all hits) exists");
+is( -s("ann.report.txt"),  5555,     "DIFFDIR: report file (with all hits) size");
 chdir("../../");    # move up to t/ directory
 
 
-done_testing();
+#done_testing();
