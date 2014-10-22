@@ -351,6 +351,7 @@ sub gi2lineage {
 =cut
 
 sub lineage2tfs {
+
    my $lineage = shift;  
    return unless ($lineage);
 
@@ -358,8 +359,17 @@ sub lineage2tfs {
    my $species     = $taxa[-1];
 
    # Improperly classified agents list
-   return ("phage", "Inoviridae", "Non-A, non-B hepatitis virus")
-            if $species eq "Non-A, non-B hepatitis virus";
+   my %bad = ( "Non-A, non-B hepatitis virus" =>
+                     [ "phage", "Inoviridae", "Non-A, non-B hepatitis virus" ],
+               "Helicobacter pylori GAMchJs117Ai" =>
+                     [ "phage", "Microviridae", "Enterobacteria phage phiX174" ],
+               "Helicobacter pylori GAMchJs114i" =>
+                     [ "phage", "Microviridae", "Enterobacteria phage phiX174" ],
+            );
+
+   if (exists $bad{$species}) {
+      return @{$bad{$species}};
+   }
 
    # Check for Virus or Phage
    if ($taxa[0] =~ /Viruses/i || $taxa[0] =~ /Viroids/i) {

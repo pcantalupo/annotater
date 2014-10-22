@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 21;
+use Test::More tests => 25;
 
 
 BEGIN {
@@ -34,6 +34,22 @@ is( $species, "Enterococcus faecalis D32", "Bacteria species");
 is( $genome, "Unknown", "Bacteria genome");
 
 
+#
+# Bacterial sequences that are really PhiX174
+# gi|463121759|gb|APEK01000004.1|   Helicobacter pylori GAMchJs117Ai
+$lineage = "cellular organisms; Bacteria; Proteobacteria; delta/epsilon subdivisions; Epsilonproteobacteria; Campylobacterales; Helicobacteraceae; Helicobacter; Helicobacter pylori; Helicobacter pylori GAMchJs117Ai";
+($type, $family, $species) = lineage2tfs($lineage);
+is( $type, "phage", "Helicobacter pylori GAMchJs117Ai is really a phage");
+is( $family, "Microviridae", "Helicobacter pylori GAMchJs117Ai is really a Microviridae");
+
+# gi|463121701|gb|APEJ01000005.1|   Helicobacter pylori GAMchJs114i
+$lineage = "cellular organisms; Bacteria; Proteobacteria; delta/epsilon subdivisions; Epsilonproteobacteria; Campylobacterales; Helicobacteraceae; Helicobacter; Helicobacter pylori; Helicobacter pylori GAMchJs114i";
+($type, $family, $species) = lineage2tfs($lineage);
+is( $type, "phage", "Helicobacter pylori GAMchJs114i is really a phage");
+is( $family, "Microviridae", "Helicobacter pylori GAMchJs114i is really a Microviridae");
+
+
+#
 # Archaea testing
 # VERSION     AJ299206.1  GI:12666990
 $lineage = "cellular organisms; Archaea; Euryarchaeota; Archaeoglobi; Archaeoglobales; Archaeoglobaceae; Ferroglobus; Ferroglobus placidus; Ferroglobus placidus DSM 10642";
