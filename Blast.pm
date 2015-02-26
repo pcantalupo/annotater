@@ -16,7 +16,7 @@ sub new{
 		qw(gilist=s seqidlist=s negative_gilist=s entrez_query=s db_soft_mask=s db_hard_mask=s),
 		qw(culling_limit=i best_hit_overhang=f best_hit_score_edge=f max_target_seqs=i dbsize=i searchsp=i),
 		qw(import_search_strategy=s export_search_strategy=s xdrop_ungap=f xdrop_gap=f xdrop_gap_final=f),
-		qw(window_size=i));
+		qw(window_size=i min_aa=i));
 	my @bools = (qw(ungapped parse_deflines remote use_sw_tback lcase_masking soft_masking));
 	my $r = GetOptionsFromString($options,\%mm,@reqs,@opts,@bools);
 	$self = \%mm;
