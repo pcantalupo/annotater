@@ -1,15 +1,15 @@
 #
-# Pipaslab module for Taxonomy
+# Module for Taxonomy methods
 #
 # Please direct questions and support issues to <pcantalupo@gmail.com>
 #
-# Maintained Cared by Paul Cantalupo <pcantalupo@gmail.com>
+# Maintained by Paul Cantalupo <pcantalupo-at-gmail-dot-com>
 #
 # Copyright Paul Cantalupo
 #
-# You may disrtribute this module under the same terms as perl itself
+# You may distribute this module under the same terms as perl itself
 
-# POD documentation - main docs before the code (Based on Bio::PrimarySeq)
+# POD documentation - main docs before the code
 
 =head1 NAME
 
@@ -28,7 +28,6 @@ Taxonomy - gets taxonomy information from NCBI (and other stuff too...)
   print $gi, "\n";
   
   # get a Taxid from a GI
-  
   my $taxid = gi2taxid($gi);
 
 =head1 DESCRIPTION
@@ -37,7 +36,7 @@ Taxonomy module is a set of functions to help the user obtain taxonomy
 information from NCBI.  It provides a function to convert an accession
 number into a GI number.  Then that GI number can be used to obtain the
 Taxid.  With the Taxid, the user is able to get lineage information for that
-Taxid (i.e.  Viruses, ssRNA viruses, Virgaviridae, Tobamovirus, PepperMild
+Taxid (i.e.  Viruses; ssRNA viruses; Virgaviridae; Tobamovirus; PepperMild
 Mottle virus).
 
 Taxonomy can also tell if a sequence is Virus, Phage, Bacteria, Human,
@@ -50,13 +49,11 @@ Internet connection for those functions to work.
 
 =head2 Support
 
-Please direct usage questions or bugs to 
-
-I<pcantalupo@gmail.com>
+Please direct usage questions or bugs to I<pcantalupo-at-gmail-dot-com>
 
 =head1 AUTHOR - Paul Cantalupo
 
-Email pcantalupo@gmail.com
+Email pcantalupo-at-gmail-dot-com
 
 =head1 SUNDRY ITEMS
 
@@ -93,13 +90,10 @@ Other modules that do some similar stuff: Bio::Taxon, Bio::DB::Taxonomy
 
 =head1 TODO
 
-This library should be recoded to use Bio::DB::SoapEUtilities instead of
-Bio::DB::EUtilities.  See documentation for Bio::DB::SoapEUtilitiess L<http://www.bioperl.org/> and the
-ESoap information (LINK here)  on NCBI's website.
-
 =head1 APPENDIX
 
-The rest of the documentation details each of the object methods. Internal methods are usually preceded with a _
+The rest of the documentation details each of the object methods. Internal
+methods are usually preceded with a _
 
 =cut
 
@@ -152,6 +146,8 @@ my $NOFAMILY = "NoFamily";
             May not work with all non-genbank accession numbers. For
             example, it does not work with naked PDB accession numbers like
             2FL8 but OK if it is the full fasta identifier: pdb|2FL8|A
+ Errors   : When submitting a malformed request (i.e. an invalid accession 
+            number like 'XYZ', method will throw an error and exit)
 
 =cut
 
@@ -454,13 +450,12 @@ sub get_virus_family {
 
 =head2 is_phage
 
-To be done...
-
-# argument: array containing lineage information that goes from general to
-#           specific (last element must be the species name)
-#
-# return value: integer (1 it is a phage or 0 it is NOT a phage)
-#
+ Title    : is_phage
+ Usage    : $isphage = is_phage(@lineage)
+ Function : To determine if the lineage of organism is a phage or not.
+ Returns  : An integer - 1 it is a phage or 0 it is NOT a phage
+ Args     : Array containing lineage information that goes from general to
+            specific (last element must be the species name)
 
 =cut
 
@@ -489,13 +484,11 @@ sub is_phage {
 
 =head2 is_phage_family
 
-To be done...
-
-# argument: string (family name)
-#
-# return value: 1 if the argument is a Phage family
-#               0 if the argument is not a Phage family
-#               undef if the argument is not TRUE
+ Title    : is_phage_family
+ Usage    : $isphagefamily = is_phage_family($familyname)
+ Function : Determines if the string argument is a phage family or not.
+ Returns  : An integer - 1 if the argument is a phage family or 0 if not.
+ Args     : A string (virus family name)
 
 =cut
 
@@ -522,7 +515,8 @@ sub is_phage_family {
                         Podoviridae
                         Rudiviridae
                         Siphoviridae
-                        Tectiviridae/;
+                        Tectiviridae
+                        Turriviridae/;
 
 
    foreach (@PHAGEFAMS) {
@@ -534,13 +528,12 @@ sub is_phage_family {
 
 =head2 get_genome_type
 
-To be done...
-# argument: string (family name)
-#
-# return value: string (if family is not found or is "NoFamily", returns
-#                      "Unknown")
-#
-
+ Title    : get_genome_type
+ Usage    : $genometype = get_genome_type("Adenoviridae")
+ Function : Obtain the genome type of the argument
+ Returns  : A string - if family is not found or is "NoFamily", returns "Unknown"
+ Args     : A string (virus family name)
+ 
 =cut
 
 sub get_genome_type {
@@ -611,6 +604,7 @@ sub get_genome_type {
                   Siphoviridae => 'dsDNA,linear,nonsegmented',
                   Sobemovirus => 'ssRNA(+),linear,nonsegmented',
                   Tectiviridae => 'dsDNA,linear,nonsegmented',
+                  Turriviridae => 'dsDNA,linear,nonsegmented',
                   Tetraviridae => 'ssRNA(+),linear,nonsegmented',
                   Tobamovirus => 'ssRNA(+),linear,nonsegmented',
                   Tombusviridae => 'ssRNA(+),linear,nonsegmented',
