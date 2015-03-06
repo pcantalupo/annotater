@@ -6,6 +6,7 @@ use Getopt::Long qw(GetOptionsFromString);
 use File::Copy;
 use SeqFile;
 use Blast;
+use Rapsearch;
 use LocalTaxonomy;
 use Taxonomy;
 use IO::String;
@@ -72,7 +73,17 @@ sub new{
 	while(<IN>){
 		next if $_ =~ /^\s+$|^\#/;
 		chomp;
-		push(@programs,new Blast($_,$self));
+		
+		my @f = split;
+		if ($f[1] =~ /blast/) {
+                  push(@programs, Blast->new($_,$self));
+                }
+                elsif ($f[1] =~ /rapsearch/) {
+                  push(@programs, Rapsearch->new($_,$self));
+                }
+                else {
+                  die "Program $f[1] not recognized\n";
+                }
 	}
 	close IN;
 	$self->{'programs'} = \@programs;
