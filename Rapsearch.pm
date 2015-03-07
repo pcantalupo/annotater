@@ -7,14 +7,14 @@ use Bio::SeqIO;
 
 sub new {
   my $class = shift;
-  my $options = shift;
+  my $options = shift;   # this value comes from annotator config file (i.e. -exec rapsearch -d ...)
   my $default = shift;
   
   my $self;
   $self->{'num_threads'} = $default->{'num_threads'};   # options from Reann.pm
   $self->{'evalue'} = ($default->{'evalue'} == 10) ? 1 : $default->{'evalue'};    # not 10 like BLAST
   my @reqs = qw(exec=s num_threads|z=i evalue|e=f pid=f qc=f);
-  my @opts = qw(q=s d=s o=s u=i s=s i=f l=i v=i b=i t=s p=s g=s a=s w=s x=s);
+  my @opts = qw(d=s s=s i=f l=i v=i b=i p=s g=s a=s w=s x=s);  # not allowing -q, -o -u, -t options
   GetOptionsFromString($options,$self, @reqs, @opts);
 
   if (! -e $self->{'d'}) {
@@ -73,7 +73,7 @@ sub run {
     `$cmd`;
   } 
 
-  $self->CalculateQueryLengths;
+  $self->CalculateQueryLengths;   # rapsearch doesn't output 'qlen' so we need to determine lengths manually. Query lengths are used in query coverage calculation
 
   my %report; 
   $self->Parse($out, \%report);

@@ -66,19 +66,6 @@ sub run{
 	$self->Parse($out,\%filter);
 	return ($out,\%filter);
 }
-sub GetFilter{
-	my $self = shift;
-	my $out = shift;
-	my %filter;
-	if($self->{'outfmt'} == 6){
-		open IN, $out;
-		while(<IN>){
-			my @cols = split "\t", $_;
-			$filter{$cols[0]} = 1 if $self->Pass(@cols);
-		}	
-	}
-	return \%filter;
-}
 sub GetOutName{
 	my $self = shift;
 	my $in = shift;
