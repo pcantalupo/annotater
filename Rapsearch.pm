@@ -133,7 +133,6 @@ sub GetOutName{
   pop @out;
   my $e = $self->{'exec'};
   my $o = join('.',@out,$i,$e);
-  print "output name is $o\n";
   return $o;
 }
 
