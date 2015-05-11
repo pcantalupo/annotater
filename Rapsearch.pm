@@ -92,6 +92,11 @@ sub ParseOutfmt{      # parse file containing Rapsearch results
   my ($self,$file,$report) = @_;
   open IN, $file;
   my %idHash;
+
+  if (! exists $self->{qlen}) {
+    $self->CalculateQueryLengths
+  }
+  
   while(<IN>){
     next if /^#/;
     chomp;
@@ -103,7 +108,7 @@ sub ParseOutfmt{      # parse file containing Rapsearch results
       $report->{$cols[0]}{'pid'} = $cols[2];	
       $report->{$cols[0]}{'accession'} = $cols[1];
       $idHash{$cols[1]} = 1;
-      $report->{$cols[0]}{'qc'} = abs (100*(($cols[7]+1-$cols[6])/  $self->{'qlen'}{$cols[0]}  ));     
+      $report->{$cols[0]}{'qc'} = 100 * (abs($cols[6]-$cols[7]) + 1)/ $self->{'qlen'}{$cols[0]};
       $report->{$cols[0]}{'algorithm'} = $self->{'exec'};
       ($report->{$cols[0]}{'db'} = $self->{'d'}) =~ s|^/.*/||;
       my @pos = @cols[6..9];
