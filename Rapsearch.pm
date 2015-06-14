@@ -28,6 +28,7 @@ sub new {
   
   $self->SetCutOffs($default);
   $self->Build;
+  $self->Version;
   return $self;
 }
 
@@ -60,6 +61,11 @@ sub Build{
     }	
   }
   $self->{'command'} = $command;
+}
+
+sub Version {
+  my ($self) = @_;
+  $self->{version} = `blastdbcmd -info -db $self->{d}`;
 }
 
 sub run {

@@ -27,6 +27,7 @@ sub new{
 	$self->{'cutoffs'} = $self->SetCutOffs($default);
 	$self->{'cutoffs'}{'report_all'} = $default->{'report_all'};
 	$self->Build;
+	$self->Version;
 	return $self;
 }
 sub Build{
@@ -52,6 +53,10 @@ sub Build{
 		}	
 	}
 	$self->{'command'} = $command;
+}
+sub Version {
+	my ($self) = @_;
+	$self->{version} = `blastdbcmd -info -db $self->{db}`;
 }
 sub run{
 	my $self = shift;

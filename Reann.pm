@@ -87,6 +87,12 @@ sub new{
 	}
 	close IN;
 	$self->{'programs'} = \@programs;
+	open (my $version, ">", "version.txt") or die "Can't open version.txt: $!\n";
+	foreach (@{$self->{programs}}) {
+          print $version $_->{version},"\n";
+        }
+        close ($version);
+
 	$self->{'out'} = ();
 	bless $self,$class;
 	return $self;
