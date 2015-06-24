@@ -149,6 +149,8 @@ sub GetOutName{
 
 sub CalculateQueryLengths {
   my $self = shift;
+  return if (!defined $self->{'query'} || ! -e $self->{'query'}); # this is needed here for Reann.pm->Report->Parse when there were no sequences left to search during rapsearch step. The query file is removed at the end of Reann.pm->run. Then since no querylengths were obtained during the Reann->run step in rapsearch, now when it tries to get querylengths, the query file had already been deleted therefore we need to catch this situation and return from subroutine.
+   
   my $seqin = Bio::SeqIO->new(-file => $self->{'query'}, -format => $self->{cutoffs}{seqs}{format});
   while (my $seq = $seqin->next_seq) {
     my $qid = $seq->id;
