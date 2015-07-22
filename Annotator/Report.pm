@@ -226,6 +226,11 @@ sub run_entropy {
 
 =cut
 
+# default is to retun every row of a Report file except that if a sequence does not
+# pass the entropy cutoffs, the PID field to the SSEND field are set to the empty string.
+# This essentially makes the sequence an unannotated sequence.
+#
+# If you do not want the default behavior, pass a hash argument with 'remove => 1'
 sub pass_entropy {
   my ($self, %args) = @_;
   
@@ -264,6 +269,15 @@ sub pass_entropy {
         )
     {
       push(@$toReturn, $_);
+    }
+    else {
+      unless (exists $args{remove}) {
+        my $pid_col = 3;   my $ssend_col = 17;
+        for (my $i = $pid_col; $i <= $ssend_col; $i++) {
+          $fields[$i] = "";
+        }
+        push(@$toReturn, join("\t",@fields));
+      }
     }
   }
   close ($fh);
