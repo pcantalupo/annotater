@@ -1,9 +1,10 @@
 #!/usr/bin/env perl
 
-# Script will get virus and unassigned sequences from a Annotator report
-# file.
+# Script will get virus and unassigned sequences from a Annotator report file.
 
-# You can perform entropy filtering on the seqences with -t option. 
+# You can perform entropy filtering on the report file with -t option.  Use
+# -a option to recover non-vu seqs that have poor entropy hits (i.e. a
+# bacterial hit with poor entropy) as an unannotated sequence
 
 # You can perform blast filtering with -f option.  Blast filtering allows
 # you to provide more relaxed settings of Qcov, PID and evalue than what you
@@ -25,6 +26,7 @@ my ($qc, $pid, $evalue, $report);
 my @blast;
 my $blastfilter = 0;
 my $entropy = 0;
+my $returnall = 0;
 my $suffix;
 my $delim = '|';
 GetOptions ("querycoverage|q=s" => \$qc,
@@ -33,6 +35,7 @@ GetOptions ("querycoverage|q=s" => \$qc,
             "blast|b=s@"        => \@blast,
             "blastfilter|f"     => \$blastfilter,
             "report|r=s"        => \$report,
+            "returnall|a"       => \$returnall,
             "entropy|t"         => \$entropy,
             "delim=s"           => \$delim,
             "suffix|x=s"        => \$suffix,
@@ -54,7 +57,11 @@ my $pipe = '';
 my $pipe_cut =  "cut -f 1,2,9";
 my $pipe_grep = q{grep -P '\tvirus|\t\t'};
 if ($entropy) {
-  $pipe = "filterentropy.pl -r $report | $pipe_grep | $pipe_cut | ";
+  my $a = "";
+  if ($returnall) {
+    $a = "-a";
+  }
+  $pipe = "filterentropy.pl -r $report $a | $pipe_grep | $pipe_cut | ";
 }
 else {
   $pipe = "$pipe_grep $report | $pipe_cut | ";
