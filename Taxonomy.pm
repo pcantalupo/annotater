@@ -319,8 +319,9 @@ sub gi2lineage {
       eval { @lineage = taxid2lineage($taxid); };   # taxid2lineage from this module
    } while ($@);
 
-   if ($lineage[0] =~ /^Empty id list/) {
-      print STDERR $_, "\tError: No Lineage found, empty id list\n";
+   if ($lineage[0] =~ /^Empty id list|Error occurred/) {
+      chomp $lineage[0];
+      print STDERR "gi2lineage: Problem getting lineage for taxid $taxid: $lineage[0]\n";
       return "";
    }
 
