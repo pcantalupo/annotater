@@ -28,7 +28,7 @@ sub new{
 		$self->{'nodes'} = $ENV{'NODESDMP'} if !(defined($self->{nodes}) && -e $self->{nodes});
 		$self->{'dict'} = new Bio::LITE::Taxonomy::NCBI(db => 'NCBI', names => $self->{names}, nodes => $self->{nodes});
 	}
-	$self->{'gi2lineage'} = ();
+	#$self->{'gi2lineage'} = ();
 	bless $self, $class;
 	return $self; 
 }
@@ -73,7 +73,15 @@ sub GetLineage{
 	return 0 if !$type || !$gi;
 
 	# check if we have lineage saved for this gi
-	if (exists $self->{'gi2lineage'}{$gi}) {
+	if ($self->{'gi2taxid'}{$gi}) {
+		my $taxid = $self->{'gi2taxid'}{$gi};
+		if ($self->{'taxid2lineage'}{$taxid}) {
+			print STDERR "GetLineage: have lineage for gi $gi through taxid $taxid\n";
+			return join ("; ", @{$self->{'taxid2lineage'}{$taxid}});
+		}
+	}
+	elsif ($self->{'gi2lineage'}{$gi}) {   # this is true when no taxid was found locally and then lineage gets retrieved remotely
+		print STDERR "GetLineage: have lineage for gi $gi but not through a taxid\n";
 		return join ("; ", @{$self->{'gi2lineage'}{$gi}});
 	}
 	
@@ -100,8 +108,14 @@ sub GetLineage{
 			print STDERR "GetLineage: didn't get valid taxid:<$taxid> for GI:$gi so getting lineage from NCBI\n";
 			@lineage = gi2lineage($gi);
 		}
-		# else, get it from LOCAL taxonomy database
+		# else, get taxid from LOCAL taxonomy database
 		else {
+			# check if already have lineage for taxid
+			if ($self->{'taxid2lineage'}{$taxid}) {
+				print STDERR "GetLineage: have lineage for taxid $taxid (current gi $gi)\n";
+				return join ("; ", @{$self->{'taxid2lineage'}{$taxid}});
+			}
+
 			my $get = $self->{'dict'};
 			@lineage =  $get->get_taxonomy($taxid);
 			if ($lineage[0] eq "") {
@@ -111,8 +125,14 @@ sub GetLineage{
 	}
 	
 	# save gi and lineage information
-	$self->{'gi2lineage'}{$gi} = \@lineage;
-	
+	if ($taxid) {
+		$self->{'taxid2lineage'}{$taxid} = \@lineage;
+		$self->{'gi2taxid'}{$gi} = $taxid;
+	}
+	else {
+		$self->{'gi2lineage'}{$gi} = \@lineage;
+	}
+
 	#print STDERR "Lineage is ", join ("; ", @lineage), " for GI:$gi and Taxid:$taxid\n";
 	return join("; ", @lineage);
 }
