@@ -116,8 +116,7 @@ sub GetLineage{
 				return join ("; ", @{$self->{'taxid2lineage'}{$taxid}});
 			}
 
-			my $get = $self->{'dict'};
-			@lineage =  $get->get_taxonomy($taxid);
+			@lineage = $self->get_taxonomy($taxid);
 			if ($lineage[0] eq "") {
 				print STDERR "GetLineage: cannot get lineage from local taxonomy even with valid taxid:<$taxid> for GI:$gi\n";
 			}

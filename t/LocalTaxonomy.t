@@ -59,6 +59,14 @@ is( $lineage,
     "GetLineage $algo hit to HHV5 gi $gi (in local bin)" );
 
 
+#
+# GIs in local gi_taxid but not in names and nodes
+#
+
+$algo = "BLASTP";  $gi = 39;
+$lineage = $lt->GetLineage($algo, $gi);
+is( $lineage, "", "GetLineage $algo hit to gi $gi (in local bin) but taxid not found in local names and nodes" );
+
 
 #
 # GIs that are NOT in local ncbi taxonomy files
