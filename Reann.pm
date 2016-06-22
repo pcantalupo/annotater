@@ -243,7 +243,6 @@ sub Report{ # edit here to add get all
 
 sub Taxonomy {
 	my ($self, %args) = @_;
-	return unless $self->{'tax'};    # check to see if Taxonomy sub should be executed
 	
 	print "Taxonomy",$/;
 
@@ -290,12 +289,18 @@ sub Taxonomy {
 	
 	#
 	# get lineage information
-	print "\tStarting LocalTaxonomy - ";
-	($self->{remotetax}) ?
+	my $lt;
+	if ($self->{'tax'}) {
+	  print "\tStarting LocalTaxonomy - ";
+	  ($self->{remotetax}) ?
 		print "getting taxonomy solely from NCBI\n" :
 		print "getting taxonomy locally\n";
-		
-	my $lt = ($self->{remotetax}) ? LocalTaxonomy->new(remotetax => 1) : LocalTaxonomy->new;
+          $lt = ($self->{remotetax}) ? LocalTaxonomy->new(remotetax => 1) : LocalTaxonomy->new;
+        }
+        else {
+          print "\tSkipping LocalTaxonomy\n";
+        }
+
 	seek IN, 0, 0;                  # seek to beginning of report file
 	<IN>;
 	while (<IN>) {
@@ -311,17 +316,18 @@ sub Taxonomy {
 			my $gi = (split (/\|/, $accession))[1];
 
 			my $algo = $rf[7];
-			my $lineage = $lt->GetLineage($algo, $gi, $self->{'remotetax'});
-			if ($lineage ne "") {
+			if ($self->{'tax'}) {
+			  my $lineage = $lt->GetLineage($algo, $gi, $self->{'remotetax'});
+			  if ($lineage ne "") {
 				($type, $family, $species) = lineage2tfs($lineage);
 				$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
+                          }
 			}
-			
-			# get description from %acc hash
-			if ($gi) {
+                        # get description from %acc hash
+                        if ($gi) {
 				my $db = $rf[8];
 				$desc = $acc{$db}{$accession};
-			}
+                        }
 		}
 		
 		my $is_nsf = has_nsf($rf[1]);
