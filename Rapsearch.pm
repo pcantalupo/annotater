@@ -88,6 +88,9 @@ sub run {
 
 sub Parse{
   my $self = shift;  
+  
+  $self->{'query'} = $self->{'cutoffs'}{'file'} if (! $self->{'query'} );
+  
   if(!$self->{'cutoffs'}{'report_all'}){
     return $self->ParseOutfmt(@_);	
   }
