@@ -17,9 +17,9 @@ is( $family, "Polyomaviridae", "SV40 family");
 is( $species, "Simian virus 40", "SV40 species");
 is( $genome, "dsDNA,circular,nonsegmented", "SV40 genome");
 is( accession2gi('J02400'), "965480", "SV40 acc2gi - eutils dependency");
-is( gi2taxid('965480'), "10633", "SV40 gi2taxid - eutils dependency");
+is( gi2taxid('965480'), "1891767", "SV40 gi2taxid - eutils dependency");
 is( gi2lineage('965480'),
-	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Polyomavirus; Simian virus 40",
+	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
 	"SV40 gi2lineage - eutils dependency");
  
 # Bacterial sequence
@@ -66,10 +66,10 @@ is( $genome, "Unknown", "Archaea genome");
 # taxid2lineage testing
 #
 is( taxid2lineage('10633'),
-	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Polyomavirus; Simian virus 40",
+	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
 	"taxid2lineage tested in scalar context");
 my @sv40_expected = ('Viruses', 'dsDNA viruses, no RNA stage',
-                   'Polyomaviridae', 'Polyomavirus', 'Simian virus 40');
+                   'Polyomaviridae', 'Betapolyomavirus', 'Macaca mulatta polyomavirus 1');
 my @sv40_test     = taxid2lineage(10633);
 is("@sv40_expected", "@sv40_test", "taxid2lineage tested in array context");
 
