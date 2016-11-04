@@ -9,7 +9,6 @@ use Blast;
 use Rapsearch;
 use LocalTaxonomy;
 use Taxonomy;
-use IO::String;
 use SeqUtils;
 use Annotator::Report;
 
