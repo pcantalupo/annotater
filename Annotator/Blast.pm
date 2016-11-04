@@ -98,7 +98,7 @@ package Annotator::Blast;
 
 use 5.006;
 use strict;
-use warnings # FATAL => 'all';
+use warnings; # FATAL => 'all';
 
 our (@SWITCHES, %OK_FIELD, %COLS, $AUTOLOAD);
 our $VERSION = '0.01';
