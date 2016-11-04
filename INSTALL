@@ -61,4 +61,5 @@ tar xvf taxdump.tar
 rm -f *gz
 
 # convert DMP file to BIN file for Bio::LITE::Taxonomy::NCBI::Gi2taxid module
+# see https://github.com/pcantalupo/mytaxonomy
 makebin.pl &
