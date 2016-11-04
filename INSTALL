@@ -1,30 +1,43 @@
 ########################
 Modules needed
 ########################
-Bioperl - see bioperl.org
+Bioperl
+- see bioperl.org. Need Bio::Seq, Bio::SeqIO, Bio::Root::Root.
 
 Bio::DB::EUtilities
+- https://github.com/bioperl/Bio-EUtilities.
 
 Bio::LITE::Taxonomy
+ - version 0.07 http://search.cpan.org/CPAN/authors/id/M/MO/MOTIF/Bio-LITE-Taxonomy-0.07.tar.gz
 Bio::LITE::Taxonomy::NCBI
+ - version 0.08 or 0.1 http://search.cpan.org/CPAN/authors/id/M/MO/MOTIF/Bio-LITE-Taxonomy-NCBI-0.08.tar.gz
 Bio::LITE::Taxonomy::NCBI::Gi2taxid
-IO::String
-XML::Simple
+ - version 0.1 http://search.cpan.org/CPAN/authors/id/M/MO/MOTIF/Bio-LITE-Taxonomy-NCBI-Gi2taxid-0.10.tar.gz
+   (MacOSX). However there were problems with 0.1 on Linux so use version 0.06
 
-plus other dependencies like URI, HTTP::Request, ...
+XML::Simple - used by Taxonomy.pm
+
+plus other dependencies like URI, HTTP::Request, ... that are needed by the
+above modules
 
 
 #######################
 Environmental variables
 #######################
-BLASTDB - directory of blast databases
+Set the following ENVIRONMENT variables in your .profile:
 
+BLASTDB - directory of blast databases
 NGT - /path/to/gi_taxid_nucl.bin
 PGT - /path/to/gi_taxid_prot.bin
 NAMESDMP - /path/to/names.dmp
 NODESDMP - /path/to/nodes.dmp
 
-Add the Annotator folder to your PATH and PERL5LIB.
+PATH
+Add this folder and bin/ to your PATH.
+
+PERL5LIB
+Add this folder and 'Annotator' to PERL5LIB. Additionally, add the
+directories for the required modules (see above) to PERL5LIB.
 
 
 ################
