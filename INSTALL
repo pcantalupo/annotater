@@ -17,8 +17,7 @@ Bio::LITE::Taxonomy::NCBI::Gi2taxid
 
 XML::Simple - used by Taxonomy.pm
 
-plus other dependencies like URI, HTTP::Request, ... that are needed by the
-above modules
+plus other dependencies like URI, HTTP::Request, ... that are needed by the above modules
 
 
 #######################
