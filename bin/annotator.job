@@ -6,7 +6,8 @@
 #PBS -l walltime=6:00:00
 #PBS -l nodes=1:ppn=8
 
-# qsub -v FASTA=XXXX -N NAME
+# Command line (FOLDER is optional)
+# qsub -v FASTA=XXXX,ANNOTCONF=XXXX,FOLDER=XXXX -N NAME
 
 module purge
 module load genomics
@@ -32,19 +33,26 @@ function date_report () {
     echo -e "\nStep $1 $2 starting: `date`"
 }
 
-OK="annotator/OK.reann"
+OUTPUTFOLDER="annotator"
+FOLDER_OPTION="-folder $OUTPUTFOLDER"
+if [[ ! -z "$FOLDER" ]]; then
+    OUTPUTFOLDER=$FOLDER
+    FOLDER_OPTION="-folder $OUTPUTFOLDER"
+fi
+
+OK="$OUTPUTFOLDER/OK.reann"
 if [[ -e $OK ]]; then
     echo "OK file exists...exiting"
     exit
 fi
 
+#echo "Folder option:<$FOLDER_OPTION>"
+
 # Step - Annotator
 STEP_NUM=0
-date_report $STEP_NUM "Annotating sequences"
+date_report $STEP_NUM "Annotating $FASTA"
 echo "PBS_NP="$PBS_NP
-time Reann.pl -file "$FASTA" -config "$ANNOTCONF" -num_threads $PBS_NP -evalue 1e-5 -tax
+time Reann.pl -file "$FASTA" -config "$ANNOTCONF" $FOLDER_OPTION -num_threads $PBS_NP -evalue 1e-5 -tax
 status_report "$?" $STEP_NUM
-cp -v "$ANNOTCONF" annotator
+cp -v "$ANNOTCONF" "$OUTPUTFOLDER"
 touch $OK
-#rm -f ${TEMP_IN}
-
