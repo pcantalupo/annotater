@@ -1,0 +1,65 @@
+#!/bin/bash
+#SBATCH --mail-type=END
+#SBATCH --mail-user=pcantalupo@gmail.com
+#SBATCH --time=360
+#SBATCH -N 1
+#SBATCH -n 8
+#SBATCH --output=Reann.slurm.out
+#SBATCH --mem=128g
+
+# Command line (FOLDER is optional)
+# sbatch --export=TAX=1,FASTA=XXXX,ANNOTCONF=XXX,FOLDER=XXX --job-name=NAME JOBFILE
+
+module purge
+module load genomics
+module load RAPSearch2/2.24
+module load compiler/perl/5.22.0
+
+set -u
+: $FASTA $ANNOTCONF $TAX
+set +u
+
+# VARIABLES
+
+# A little function to report success or failure of job step
+function status_report () {
+    if [[ $1 != 0 ]] ; then
+	echo "ERROR: Step $2 failed with error code $1"
+	exit
+    fi
+}
+
+# function to report the date for each job step
+function date_report () {
+    echo -e "\nStep $1 $2 starting: `date`"
+}
+
+OUTPUTFOLDER="annotator"
+FOLDER_OPTION="-folder $OUTPUTFOLDER"
+if [[ ! -z "$FOLDER" ]]; then
+    OUTPUTFOLDER=$FOLDER
+    FOLDER_OPTION="-folder $OUTPUTFOLDER"
+fi
+
+OK="$OUTPUTFOLDER/OK.reann"
+if [[ -e $OK ]]; then
+    echo "OK file exists...exiting"
+    exit
+fi
+
+if [[ $TAX == 1 ]]; then
+	TAX="-tax"
+else
+	TAX=""
+fi
+
+# Step - Annotator
+STEP_NUM=0
+date_report $STEP_NUM "Annotating $FASTA"
+time Reann.pl -file "$FASTA" -config "$ANNOTCONF" $FOLDER_OPTION -num_threads $SLURM_CPUS_ON_NODE \
+		-evalue 1e-5 "$TAX"
+status_report "$?" $STEP_NUM
+cp -v "$ANNOTCONF" "$OUTPUTFOLDER"
+mv -v Reann.slurm.out "$OUTPUTFOLDER"
+touch $OK
+
