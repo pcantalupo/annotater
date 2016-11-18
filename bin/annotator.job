@@ -12,20 +12,12 @@ module purge
 module load genomics
 
 set -u
-: $FASTA
+: $FASTA $ANNOTCONF
 set +u
 
 # VARIABLES
-ANNOTCONF=annot.conf
 
-# Guarantee that we start in the PBS work directory
-cd ${PBS_O_WORKDIR}
-
-# STAGE IN
-echo -e "\nJob starting: `date`"
-echo "StageIn moving to ${SCRATCH} directory. Files will be copied and deleted during appropriate stages in the pipeline"
-cd ${SCRATCH}
-echo -e "\nPipeline starting: `date`" && s=`date +%s`
+cd "$PBS_O_WORKDIR"
 
 # A little function to report success or failure of job step
 function status_report () {
@@ -40,33 +32,19 @@ function date_report () {
     echo -e "\nStep $1 $2 starting: `date`"
 }
 
+OK="annotator/OK.reann"
+if [[ -e $OK ]]; then
+    echo "OK file exists...exiting"
+    exit
+fi
+
 # Step - Annotator
 STEP_NUM=0
-echo "-exec blastn -db human_genomic -qc 50 -pid 80 -lcase_masking -max_target_seqs 2
--exec blastn -db nt -qc 50 -pid 80
--exec blastx -db nr
--exec tblastx -db viral.1.1.genomic" > ${ANNOTCONF}
-date_report ${STEP_NUM} "Annotating sequences"
-cp -v ${PBS_O_WORKDIR}/${FASTA} ${SCRATCH}
-TEMP_IN=${FASTA}
-TEMP_OUT=
-OUTDIR=${FASTA}.annotator
-Reann.pl -file ${TEMP_IN} -config ${ANNOTCONF} -folder ${OUTDIR} -num_threads 8 -evalue 1e-5 -tax
-status_report ${?} ${STEP_NUM}
-mv -v ${ANNOTCONF} ${OUTDIR}    # mv config file into annotator output folder
-touch ${OUTDIR}/OK
-rm -f ${TEMP_IN}
+date_report $STEP_NUM "Annotating sequences"
+echo "PBS_NP="$PBS_NP
+time Reann.pl -file "$FASTA" -config "$ANNOTCONF" -num_threads $PBS_NP -evalue 1e-5 -tax
+status_report "$?" $STEP_NUM
+cp -v "$ANNOTCONF" annotator
+touch $OK
+#rm -f ${TEMP_IN}
 
-# STAGE OUT function
-# -- We want to use a copy rather than a move to guard against
-#    any failure during the STAGE OUT process.  It's fine to do
-#    an explicit copy and delete rather than a move as it is 
-#    slightly more fault-tolerant.
-echo -e "\nStageOut starting"
-echo -e "\nPipeline end: `date`" && e=`date +%s`
-echo Pipelinetime:$((e-s))
-cp -vr ${OUTDIR} ${PBS_O_WORKDIR}
-echo "Job done: `date`"
-echo "Cleaning up ${SCRATCH} directory"
-cd ${PBS_O_WORKDIR}
-rm -rf ${SCRATCH}
