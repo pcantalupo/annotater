@@ -117,6 +117,7 @@ $VERSION     = 1.00;
                   taxid2lineage
                   gi2lineage
                   accession2gi
+                  gi2acc
                   lineage2tfs
                   get_virus_family
                   is_phage
@@ -171,6 +172,31 @@ sub accession2gi {
    return $gi;
 }   
 
+
+=head2 gi2acc
+
+ Title    : gi2acc
+ Usage    : $acc = gi2acc(965480);
+ Function : Returns an accession.version from a GI number
+ Returns  : A scalar (Acc.Version value)
+ Args     : a GI number
+
+=cut
+
+sub gi2acc {
+   my ($gi) = @_;
+   return unless ($gi);
+
+   my $factory = Bio::DB::EUtilities->new(-eutil => 'efetch',
+                                          -db => 'nucleotide',  # don't need to change this to Protein for protein accession, it works ok keeping set to 'nucleotide'
+                                          -id => [ $gi ],
+                                          -email => 'pcantalupo@gmail.com',
+                                          -rettype => 'acc');
+   my $acc = $factory->get_Response->content;
+
+   chomp $acc;
+   return $acc;
+}
 
 
 =head2 gi2taxid
