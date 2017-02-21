@@ -542,6 +542,7 @@ sub is_phage_family {
                         Podoviridae
                         Rudiviridae
                         Siphoviridae
+                        Sphaerolipoviridae
                         Tectiviridae
                         Turriviridae/;
 
@@ -616,6 +617,7 @@ sub get_genome_type {
                   Poxviridae 		=> 'dsDNA,linear,nonsegmented',
                   Rudiviridae 		=> 'dsDNA,linear,nonsegmented',
                   Siphoviridae 		=> 'dsDNA,linear,nonsegmented',
+                  Sphaerolipoviridae =>'dsDNA,linear/circular,nonsegmented',
                   Tectiviridae 		=> 'dsDNA,linear,nonsegmented',
                   Turriviridae 		=> 'dsDNA,linear,nonsegmented',
 
