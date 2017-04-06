@@ -1,0 +1,4 @@
+seqID	seq	seqLength	pid	coverage	e	accession	desc	type	family	species	genome	algorithm	db	qstart	qend	sstart	ssend	nsf	qent	qhsp_ent	shsp_ent	shsp_%lc
+contig_A	CAA	3	100	100	1.00E-05	gi|8821985|gb|BBB81918.1|	ORF B2	virus	Baculoviridae	Autographa californica nucleopolyhedrovirus	dsDNA,circular,nonsegmented	rapsearch	nr	537	7	650	875	1	85	84	-1	-1
+contig_B	CGA	3	100	100	1.00E-05	gi|1226168|gb|AAA92249.1|	ORF B (bases 1850-5560)	virus	Baculoviridae	Autographa californica nucleopolyhedrovirus	dsDNA,circular,nonsegmented	rapsearch	nr	1000	200	680	849	1	85	84	-1	-1
+contig_C	TTA	3	100	100	1.00E-05	gi|1226168|gb|AAA92249.1|	ORF B (bases 1850-5560)	virus	Baculoviridae	Autographa californica nucleopolyhedrovirus	dsDNA,circular,nonsegmented	rapsearch	nr	800	300	671	820	1	85	84	-1	-1

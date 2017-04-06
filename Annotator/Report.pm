@@ -222,6 +222,78 @@ sub run_entropy {
 }
 
 
+=head2 pass_filters
+# Run pass_entropy and remove_baculo_artifact
+#
+# Does not return the report header
+=cut
+
+sub pass_filters {
+  my ($self, %args) = @_;
+
+  unless ($self->{TEMP_ENTROPYFILE} || exists $args{use_report} ) {
+    $self->run_entropy(%args);
+  }
+  
+  my $fh;
+  if (exists $args{use_report}) {
+    open ($fh, "<", $self->{REPORT});    # Report file has entropy values
+  }
+  else {
+    open ($fh, "<", $self->{$TEMP_ENTROPYFILE});
+  }
+  
+  my $passed = $self->pass_entropy( use_report => 1 );
+
+  $passed = $self->remove_baculo_artifact( report => $passed );
+
+  return $passed;
+}
+
+
+=head2 remove_baculo_artifact
+
+# default is to return every row except to label baculovirus hits as
+# unannotated if the only baculo hits in the sample is to one subject
+# description
+#
+# does not expect report header nor returns report header
+#
+# Unimplemented:
+#    I should add ability to remove these rows entirely
+
+=cut
+
+sub remove_baculo_artifact {
+  my ($self, %args) = @_;
+  
+  my %baculo;
+  foreach my $row ( @{ $args{report} } ) {
+    my @fields = split ("\t", $row);
+    if ($fields[9] eq 'Baculoviridae') {
+      $baculo{$fields[7]}++;   # index 7 is the 'Subject description'
+    }
+  }
+  
+  # If there is only one Baculo subject description, change Baculo rows to unannotated.
+  if (keys %baculo == 1) {
+    foreach my $row ( @{ $args{report} } ) {
+      my @fields = split ("\t", $row);
+      if ($fields[9] eq 'Baculoviridae') {
+        my $pid_col = 3;  my $ssend_col = 17;
+        for (my $i = $pid_col; $i <= $ssend_col; $i++) {
+          $fields[$i] = "";
+        }
+      }
+      $row = join ("\t", @fields);
+    }
+  }
+  
+  return $args{report};   
+}
+
+
+
 =head2 pass_entropy
 
 =cut
@@ -231,6 +303,8 @@ sub run_entropy {
 # This essentially makes the sequence an unannotated sequence.
 #
 # If you do not want the default behavior, pass a hash argument with 'remove => 1'
+#
+# Does not return the report header
 sub pass_entropy {
   my ($self, %args) = @_;
   
