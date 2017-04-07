@@ -35,7 +35,7 @@ sub Build{
 	my %params;
 	my $command;
 	my $outfmt_s = $self->{'outfmt_s'};
-	my $outfmt = '-outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen';
+	my $outfmt = '-outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs qcovhsp';
 	$outfmt .= " $outfmt_s" if defined($outfmt_s);
 	$outfmt .= '"';
 	$command = join(' ',$self->{'exec'},'-show_gis',"-num_threads",
@@ -45,12 +45,12 @@ sub Build{
 		$o =~ s/\=.+$//;
 		if(defined($self->{$o})){
 			$command = join(' ',$command,"-$o",$self->{$o});
-		}	
+		}
 	}
 	foreach my $o (@{$self->{'params'}{'bools'}}){
 		if(defined($self->{$o})){
 			$command = join(' ',$command,"-$o");
-		}	
+		}
 	}
 	$self->{'command'} = $command;
 }
@@ -85,15 +85,16 @@ sub GetOutName{
 sub PrintParams{
 	my $self = shift;
 	foreach my $k (keys %{$self}){
-		print join "\t", $k, $self->{$k},$/;	
-	}	
+		print join "\t", $k, $self->{$k},$/;
+	}
 }
 sub Pass{
 	my $self = shift;
-	my @cols = @_;	
+	my @cols = @_;
 	return 1 if($self->{'cutoffs'}{'evalue'} >= $cols[10]
-		&& $self->{'cutoffs'}{'pid'} <= $cols[2] 
-		&& $self->{'cutoffs'}{'qc'} <= abs (100*(($cols[7]+1-$cols[6])/$cols[12])));
+		&& $self->{'cutoffs'}{'pid'} <= $cols[2]
+		&& $self->{'cutoffs'}{'qc'} <= $cols[14]);     # using qcovs as the query coverage
+#		&& $self->{'cutoffs'}{'qc'} <= abs (100*(($cols[7]+1-$cols[6])/$cols[12])));
 	return 0;
 }
 sub SetCutOffs{
@@ -111,13 +112,13 @@ sub SetCutOffs{
 sub Parse{
 	my $self = shift;
 	if($self->{'outfmt'} && !$self->{'cutoffs'}{'report_all'}){
-		return $self->ParseOutfmt(@_);	
+		return $self->ParseOutfmt(@_);
 	}
 	elsif($self->{'outfmt'} && $self->{'cutoffs'}{'report_all'}){
 		return $self->ParseAllOutfmt(@_);
 	}
 	else{
-		
+
 	}
 }
 sub ParseAllOutfmt{
@@ -138,7 +139,8 @@ sub ParseAllOutfmt{
 			$idHash{$cols[1]} = 1;
 			$line{'algorithm'} = $self->{'exec'};
 			$line{'db'} = $self->{'db'};
-			$line{'qc'} = abs (100*(($cols[7]+1-$cols[6])/$cols[12]));
+#			$line{'qc'} = abs (100*(($cols[7]+1-$cols[6])/$cols[12]));
+			$line{'qc'} = $cols[14];    # using qcovs as the query coverage
 			$line{'length'} = $cols[12];
 			my @pos = @cols[6..9];
 			$line{'pos'} = \@pos;
@@ -147,7 +149,7 @@ sub ParseAllOutfmt{
 			$report->{$cols[0]} = \@mm if !defined($report->{$cols[0]});
 		}
 	}
-	close IN;	
+	close IN;
 	return \%idHash;
 }
 sub ParseOutfmt{
@@ -160,13 +162,14 @@ sub ParseOutfmt{
 	while(<IN>){
 		chomp $_;
 		my @cols = split $delim, $_;
-		if($self->Pass(@cols) 
+		if($self->Pass(@cols)
 			&& (!$report->{$cols[0]} || $report->{$cols[0]}{'evalue'} > $cols[10])){
-			$report->{$cols[0]}{'evalue'} = $cols[10];
-			$report->{$cols[0]}{'pid'} = $cols[2];	
+			$report->{$cols[0]}{'evalue'} = $cols[10];   # $cols[0] is Query id
+			$report->{$cols[0]}{'pid'} = $cols[2];
 			$report->{$cols[0]}{'accession'} = $cols[1];
 			$idHash{$cols[1]} = 1;
-			$report->{$cols[0]}{'qc'} = abs (100*(($cols[7]+1-$cols[6])/$cols[12]));
+#			$report->{$cols[0]}{'qc'} = abs (100*(($cols[7]+1-$cols[6])/$cols[12]));   # cols[12] is qlen
+			$report->{$cols[0]}{'qc'} = $cols[14];     # using qcovs as the query coverage
 			$report->{$cols[0]}{'length'} = $cols[12];
 			$report->{$cols[0]}{'algorithm'} = $self->{'exec'};
 			$report->{$cols[0]}{'db'} = $self->{'db'};
@@ -180,7 +183,7 @@ sub ParseOutfmt{
 sub GetDelim{
 	my $self = shift;
 	return "\t" if $self->{'outfmt'} == 6;
-	return "," if $self->{'outfmt'} == 10;	
+	return "," if $self->{'outfmt'} == 10;
 }
 1;
 
