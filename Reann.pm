@@ -28,7 +28,7 @@ my $RUNTAXONOMY = 0;
 my $REPORTALL   = 0;
 my $REMOTETAX   = 0;
 
-	
+
 sub new{
 	my $class = shift;
 	my $self = shift;
@@ -48,7 +48,7 @@ sub new{
 	$self->{'delim'}       //= $DELIM;
 	$self->{'tax'}         //= $RUNTAXONOMY;
 	$self->{'remotetax'}   //= $REMOTETAX;
-	
+
 	if (! -e $self->{config}) {
 		print "Please supply an appropriate config file (config)\n";
 		exit;
@@ -72,7 +72,7 @@ sub new{
 	while(<IN>){
 		next if $_ =~ /^\s+$|^\#/;
 		chomp;
-		
+
 		my @f = split;
 		if ($f[1] =~ /blast/) {
                   push(@programs, Blast->new($_,$self));
@@ -98,7 +98,7 @@ sub new{
 }
 sub run{
 	my $self = shift;
-	my ($i,$p) = $self->Restart;
+	my ($i,$p) = $self->Restart;   # $i is chunk number, $p is Program number
 	my $r = ($i || $p);
 	my @files = $self->{'seqs'}->GetFiles;
 	for(;$i < scalar @files; $i++){
@@ -110,14 +110,14 @@ sub run{
 			$self->WriteRestart($i,$p);
 			$self->{'out'}[$i][$p] = $out;
 			$self->{'seqs'}->FilterSeqs($i,$filter);
-		}	
+		}
 		$p = 0;
-	}	
+	}
 	$self->WriteRestart($i,$p);
 	foreach my $f(@files){
-		RM($f);	
+		RM($f);
 	}
-	
+
 	RM($self->{'config'});
 }
 sub Restart{
@@ -148,8 +148,8 @@ sub GetCompleted{
 	for(my $x = 0; $x <= $fasta; $x++){
 		for(my $y = 0; $y < @{$self->{'programs'}}; $y++){
 			last if $x == $fasta && $y == $program;
-			$self->{'out'}[$x][$y] = $self->{'programs'}[$y]->GetOutName($files[$x],$y);	
-		}	
+			$self->{'out'}[$x][$y] = $self->{'programs'}[$y]->GetOutName($files[$x],$y);
+		}
 	}
 }
 sub WriteRestart{
@@ -168,14 +168,14 @@ sub RM{
 	}
 	else{
 		$cmd = "rm ".$f;
-	}	
+	}
 	`$cmd`;
 }
 sub Overwrite{
 	my $self = shift;
 	my $cmd;
 	if($^O eq 'MSWin32'){
-		$cmd = join(' ','move',@_);	
+		$cmd = join(' ','move',@_);
 	}
 	else{
 		$cmd = join(' ','mv',@_);
@@ -185,7 +185,7 @@ sub Overwrite{
 sub PrintParams{
 	my $self = shift;
 	$self->{'seqs'}->PrintParams;
-}	
+}
 sub Report{ # edit here to add get all
 	my $self = shift;
 	my @h = qw(seqID seq seqLength pid coverage e accession algorithm db qstart qend sstart ssend);
@@ -197,7 +197,7 @@ sub Report{ # edit here to add get all
 	for(my $x = 0; $x < scalar @{$self->{'out'}}; $x++){
 		for(my $y = 0; $y < scalar @{$self->{'out'}[$x]}; $y++){
 			push(@id_list,$self->{'programs'}[$y]->Parse($self->{'out'}[$x][$y],\%blast));
-		}	
+		}
 	}
 	foreach my $h (@id_list){
 		foreach my $k (keys %{$h}){
@@ -222,7 +222,7 @@ sub Report{ # edit here to add get all
 		while(my $seq = $seqI->next_seq){
 			my $i = $seq->id;
 			my $reportline = "$d" x 9;
-			if(defined($blast{$i})){  
+			if(defined($blast{$i})){
 				foreach my $b (@{$blast{$i}}){
 					$reportline = join($d,$b->{'pid'},$b->{'qc'},
 						$b->{'evalue'},$b->{'accession'},$b->{'algorithm'},
@@ -242,7 +242,7 @@ sub Report{ # edit here to add get all
 
 sub Taxonomy {
 	my ($self, %args) = @_;
-	
+
 	print "Taxonomy",$/;
 
 	my $report = $self->{'prefix'}.".".$self->{'output'};
@@ -261,9 +261,9 @@ sub Taxonomy {
 			@hf[7..$nhf-1], "nsf"),"\n";
 
 	#
-	# get fasta seqs and descriptions from BLAST databases 
+	# get fasta seqs and descriptions from BLAST databases
 	my %acc;
-	while (<IN>) {		
+	while (<IN>) {
 		my ($acc, $db) = (split (/\t/, $_, -1))[6,8];
 		$acc{$db}{$acc}++ unless ($acc eq "");
 	}
@@ -275,7 +275,7 @@ sub Taxonomy {
 			print TMPOUT $_, "\n";
 		}
 		close TMPOUT;
-	
+
 		my $fasta_outfile = $gis_outfile . ".fa";
 		`blastdbcmd -db $db -entry_batch $gis_outfile > $fasta_outfile`;
 
@@ -285,7 +285,7 @@ sub Taxonomy {
 		}
 		unlink($gis_outfile, $fasta_outfile);
 	}
-	
+
 	#
 	# get lineage information
 	my $lt;
@@ -328,9 +328,9 @@ sub Taxonomy {
 				$desc = $acc{$db}{$accession};
                         }
 		}
-		
+
 		my $is_nsf = has_nsf($rf[1]);
-		
+
 		# output
 		print OUT join ("\t", @rf[0..6],
 				$desc,$type,$family,$species,$genome,
@@ -339,7 +339,7 @@ sub Taxonomy {
 	}
 	close OUT;
 
-	unlink ($report);	
+	unlink ($report);
 }
 
 sub add_entropy {
@@ -347,7 +347,7 @@ sub add_entropy {
 
   my $refseqs = {"viral.1.protein"   => "$ENV{BLASTDB}/viral.1.protein.faa",
                  "viral.1.1.genomic" => "$ENV{BLASTDB}/viral.1.1.genomic.fna"};
-  
+
   my $entropyReport = $self->{prefix} . ".wTax.BE." . $self->{output};
   if (-e $self->{taxout}) {
     my $ar = Annotator::Report->new(report => $self->{taxout},
