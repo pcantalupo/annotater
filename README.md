@@ -2,6 +2,23 @@
 
 Got sequences that need annotated with various BLAST programs? Look no further.
 
+## Dependencies
+
+Install the following and make sure they are working before proceeding:
+
++ [Bioperl](http://bioperl.org/)
++ Perl modules
+    + XML::Simple
+    + Bio::LITE::Taxonomy
+    + Bio::LITE::Taxonomy::NCBI
+    + Bio::LITE::Taxonomy::NCBI::Gi2taxid
++ [BLAST+](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
+    + If you are going to put your BLAST databases in a single folder, add that directory to your `BLASTDB` variable.
+
+## Installation
+
+Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable.
+
 # Methods
 
 ## Reann->new()
