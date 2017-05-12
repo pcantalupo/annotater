@@ -19,31 +19,31 @@ Install the following and make sure they are working before proceeding:
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable.
 
-# Methods
+## Developer info
 
-## Reann->new()
+### Reann->new()
 1. creates output folder
 2. copies fasta file to output folder and creates temporary sequence chunk files (named ann.X.fasta [X = 0 to N - 1 where N = num chunks] )
 3. copies configuration file to output folder
 4. writes version.txt file
 
-## Reann->run()
+### Reann->run()
 1. Writes/updates restart.txt file
 2. generates a program (i.e. blast) outputfile for each step of pipeline for each sequence file chunk
 3. removes temporary sequence chunk files (ann.X.fasta)
 
-## Reann->Report()
+### Reann->Report()
 1. creates ann.report.txt file
 2. removes fasta file that was copied into output folder
 
-## Reann->Taxonomy()
+### Reann->Taxonomy()
 1. TBD
 
-# Configuration file
+### Configuration file
 
 Line 122 - config file is removed. Remove this line so config file is kept in the output folder.
 
-# Restart file
+### Restart file
 
 The Restart file defines the step that finished. The first value is the sequence file chunk (0-based). The second value is the step of pipeline (0-based). Each step is defined on one line in the annotator config file.
 
