@@ -74,6 +74,10 @@ sub new{
 		chomp;
 
 		my @f = split;
+		if ($f[3] =~ /^~/) {
+          print "Tilde (~) are not allowed in database file paths. Use a full path instead.\n";
+          exit;
+        }
 		if ($f[1] =~ /blast/) {
                   push(@programs, Blast->new($_,$self));
                 }
@@ -270,7 +274,7 @@ sub Taxonomy {
 	foreach my $db (keys %acc) {
 		print "\tGetting fasta seqs for $db\n";
 		my $gis_outfile = "$db.gis.txt";
-		open (TMPOUT, ">", $gis_outfile);
+		open (TMPOUT, ">", $gis_outfile) or die "Can't open $gis_outfile for writing: $!\n";
 		foreach (keys %{$acc{$db}}) {
 			print TMPOUT $_, "\n";
 		}
