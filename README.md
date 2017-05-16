@@ -12,12 +12,18 @@ Install the following and make sure they are working before proceeding:
     + Bio::LITE::Taxonomy
     + Bio::LITE::Taxonomy::NCBI
     + Bio::LITE::Taxonomy::NCBI::Gi2taxid
++ [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy)
 + [BLAST+](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
     + If you are going to put your BLAST databases in a single folder, add that directory to your `BLASTDB` variable.
 
 ## Installation
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
+
+In order to use the NCBI Taxonomy database, set the following environmental variables:
+1. `NGT` - full path to the gi_taxid_nucl dictionary that was created with the Bio::LITE::Taxonomy::NCBI::Gi2taxid module
+2. `PGT` - same as `NGT` but to the protein dictionary file
+3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
 
 ## Developer info
 
