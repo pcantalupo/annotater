@@ -19,6 +19,8 @@ Install the following and make sure they are working before proceeding:
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable.
 
+Do not use a tilde (~) in the path that you set for your environmental variable `BLASTDB`; it must be a full path.
+
 ## Developer info
 
 ### Reann->new()
