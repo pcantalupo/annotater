@@ -349,7 +349,7 @@ sub Taxonomy {
 sub add_entropy {
   my ($self, %args) = @_;
 
-  my $refseqs = {"viral.1.protein"   => "$ENV{BLASTDB}/viral.1.protein.faa",
+  my $refseqs = { # "viral.1.protein"   => "$ENV{BLASTDB}/viral.1.protein.faa",
                  "viral.1.1.genomic" => "$ENV{BLASTDB}/viral.1.1.genomic.fna"};
 
   my $entropyReport = $self->{prefix} . ".wTax.BE." . $self->{output};
