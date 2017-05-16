@@ -17,9 +17,7 @@ Install the following and make sure they are working before proceeding:
 
 ## Installation
 
-Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable.
-
-Do not use a tilde (~) in the path that you set for your environmental variable `BLASTDB`; it must be a full path.
+Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
 
 ## Developer info
 
