@@ -91,7 +91,7 @@ sub GetLineage{
 		@lineage = gi2lineage($gi);
 		sleep 1;
 	} else {
-		if($type =~ /blast/i){
+		if($type =~ /blast|rapsearch/i){
 			$type = AlgorithmToType($type);
 		}
 		if("nucleotide" =~ $type){
