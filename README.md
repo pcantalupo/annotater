@@ -13,9 +13,11 @@ Install the following and make sure they are working before proceeding:
     + Bio::LITE::Taxonomy
     + Bio::LITE::Taxonomy::NCBI
     + Bio::LITE::Taxonomy::NCBI::Gi2taxid
+    + Test::File
 + [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy)
 + [BLAST+](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
     + If you are going to put your BLAST databases in a single folder, add that directory to your `BLASTDB` variable.
++ [samtools](https://sourceforge.net/projects/samtools/files/samtools/0.1.19/) version 0.1.19
 
 ## Installation
 
