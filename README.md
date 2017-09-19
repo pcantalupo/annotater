@@ -8,6 +8,7 @@ Install the following and make sure they are working before proceeding:
 
 + [Bioperl](http://bioperl.org/)
 + Perl modules
+    + Bio::DB::EUtilities
     + XML::Simple
     + Bio::LITE::Taxonomy
     + Bio::LITE::Taxonomy::NCBI
