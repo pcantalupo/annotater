@@ -317,6 +317,9 @@ sub Taxonomy {
 		unless ($accession eq "") {
 			($type, $family, $species, $genome) = ('NULL') x 4;
 			my $gi = (split (/\|/, $accession))[1];
+			if (!$gi) {
+				$gi = $accession;   # for when the subject id in blast output is not a fullgi but rather just an ACC.VER value (i.e. APS85757.2)
+			}
 
 			my $algo = $rf[7];
 			if ($self->{'tax'}) {

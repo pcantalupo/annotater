@@ -69,7 +69,7 @@ sub Load{
 #
 sub GetLineage{
 	my($self,$type,$gi,$remotetax) = @_;
-	my $taxid;
+	my $taxid = "";
 	return 0 if !$type || !$gi;
 
 	# check if we have lineage saved for this gi
@@ -94,17 +94,17 @@ sub GetLineage{
 		if($type =~ /blast|rapsearch/i){
 			$type = AlgorithmToType($type);
 		}
-		if("nucleotide" =~ $type){
+		if("nucleotide" =~ $type && $gi =~ /^-?\d+$/){  # only use Gi2taxid module if GI is an integer
 			my $d = $self->Load("nucl");
 			$taxid = $d->get_taxid($gi);
 		}
-		if("protein" =~ $type){
+		if("protein" =~ $type && $gi =~ /^-?\d+$/){  # only use Gi2taxid module if GI is an integer
 			my $d = $self->Load("prot");
 			$taxid = $d->get_taxid($gi);
 		}
 		
 		# if we dont' get a taxid, get lineage from NCBI
-		if (!defined $taxid || $taxid == 0) {
+		if (!$taxid || $taxid == 0) {
 			print STDERR "GetLineage: didn't get valid taxid:<$taxid> for GI:$gi so getting lineage from NCBI\n";
 			@lineage = gi2lineage($gi);
 		}
