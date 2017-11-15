@@ -1,4 +1,9 @@
 .DS_Store
+MYMETA.json
+MYMETA.yml
+Makefile
+blib/
+pm_to_blib
 t/diffdir/
 t/random/
 t/sewageseqs/
