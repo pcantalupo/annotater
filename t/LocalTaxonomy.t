@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Test::More; #tests => 4;
 use Data::Dumper;
+use Bio::LITE::Taxonomy::NCBI::Gi2taxid qw/new_dict/;
 
 chdir("t/");
 
@@ -10,8 +11,12 @@ BEGIN {
 }
 
 undef %ENV;
-my $lt = LocalTaxonomy->new(gi_taxid_nucl => 'data/gi_taxid_nucl.sv40.hhv5.bin',
-                            gi_taxid_prot => 'data/gi_taxid_prot.sv40.hhv5.bin',
+my $test_nucl_bin = "gi_taxid_nucl.sv40.hhv5.bin";
+my $test_prot_bin = "gi_taxid_prot.sv40.hhv5.bin";
+new_dict (in => "data/gi_taxid_nucl.sv40.hhv5.dmp", out => $test_nucl_bin);
+new_dict (in => "data/gi_taxid_prot.sv40.hhv5.dmp", out => $test_prot_bin);
+my $lt = LocalTaxonomy->new(gi_taxid_nucl => $test_nucl_bin,
+                            gi_taxid_prot => $test_prot_bin,
                             names         => 'data/names.sv40.hhv5.dmp',
                             nodes         => 'data/nodes.sv40.hhv5.dmp',
                            );
@@ -81,6 +86,8 @@ $algo = "BLASTN";  $gi = 6;
 $lineage = $lt->GetLineage($algo, $gi);
 is( $lineage, $expectedLineage, "GetLineage $algo hit to $gi (NOT in local bin)" );
 
+unlink($test_nucl_bin);
+unlink($test_prot_bin);
 
 #print Dumper($lt),"\n";
 
