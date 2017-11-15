@@ -29,7 +29,7 @@ $ra->run;
 is( -d("../annotator"), 1,        "Default test - directory 'annotator' exists");
 
 my $size = -s("ann.0.0.tblastx");
-ok( $size > 8000, "Default test - tblastx file size"); 
+ok( $size > 600 && $size < 800, "Default test - tblastx file size");
 
 $ra->Report;
 is( -e("ann.report.txt"),     1,  "Default test - report file");
@@ -52,16 +52,16 @@ $ra = Reann->new( {     'config' => 'tag.conf',
 		);
 $ra->run;
 $size = -s("ann.0.0.tblastx");
-ok( $size > 4300,      "TAGFASTA: tblastx output file size");
+ok( $size > 450 && $size < 600,      "TAGFASTA: tblastx output file size");
 
 $ra->Report;
 is( -e("ann.report.txt"),     1,       "TAGFASTA: report file exists");
 
 $ra->Taxonomy;
-is( -s("ann.wTax.report.txt"),   565,  "TAGFASTA: taxonomy report file size");
+is( -s("ann.wTax.report.txt"),   510,  "TAGFASTA: taxonomy report file size");
 
 $ra->add_entropy;
-is( -s("ann.wTax.BE.report.txt"), 609, "TAGFASTA: taxonomy BE report file size");
+is( -s("ann.wTax.BE.report.txt"), 554, "TAGFASTA: taxonomy BE report file size");
 chdir("..");
 
 
@@ -72,7 +72,11 @@ chdir("..");
 mkdir("diffdir");
 chdir("diffdir");
 remove_tree("diffdir-tag-fastq");
-$ra = Reann->new( {	'config' => '../tag.conf',
+my $conf = "my.conf";
+open (my $out, ">", $conf);
+print $out "-exec tblastx -db ../../data/tag-fasta\n";
+close ($out);
+$ra = Reann->new( {	'config' => $conf,
                    	'file'   => '../tag-fastq.fq',
                   	'folder' => 'diffdir-tag-fastq',
                    	'format' => 'fastq',
@@ -83,11 +87,11 @@ $ra = Reann->new( {	'config' => '../tag.conf',
 $ra->run;
 is( -d("../diffdir-tag-fastq"),   1, "DIFFDIR: output directory 'diffdir' exists");
 $size = -s("ann.0.0.tblastx");
-ok( $size > 4300,    "DIFFDIR: tblastx output file size OK");
+is( $size, 549,    "DIFFDIR: tblastx output file size OK");
 
 $ra->Report;
 is( -e("ann.report.txt"),     1,     "DIFFDIR: report file (with all hits) exists");
-is( -s("ann.report.txt"),  5555,     "DIFFDIR: report file (with all hits) size");
+is( -s("ann.report.txt"),  707,     "DIFFDIR: report file (with all hits) size");
 chdir("../../");    # move up to t/ directory
 
 
