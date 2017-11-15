@@ -11,8 +11,8 @@ BEGIN {
 }
 
 undef %ENV;
-my $test_nucl_bin = "gi_taxid_nucl.sv40.hhv5.bin";
-my $test_prot_bin = "gi_taxid_prot.sv40.hhv5.bin";
+my $test_nucl_bin = "data/gi_taxid_nucl.sv40.hhv5.bin";
+my $test_prot_bin = "data/gi_taxid_prot.sv40.hhv5.bin";
 new_dict (in => "data/gi_taxid_nucl.sv40.hhv5.dmp", out => $test_nucl_bin);
 new_dict (in => "data/gi_taxid_prot.sv40.hhv5.dmp", out => $test_prot_bin);
 my $lt = LocalTaxonomy->new(gi_taxid_nucl => $test_nucl_bin,
