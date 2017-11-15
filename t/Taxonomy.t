@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 25;
+use Test::More tests => 27;
 
 
 BEGIN {
@@ -21,7 +21,15 @@ is( gi2taxid('965480'), "1891767", "SV40 gi2taxid - eutils dependency");
 is( gi2lineage('965480'),
 	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
 	"SV40 gi2lineage - eutils dependency");
- 
+# will work with an acc.ver value as well
+is( gi2lineage('J02400.1'),
+	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
+	"SV40 gi2lineage (with J02400.1) - eutils dependency");
+# will work with protein acc.ver value too
+is( gi2lineage('AAB59924.1'),
+	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
+	"SV40 gi2lineage (with J02400.1) - eutils dependency");
+
 # Bacterial sequence
 # gi|397335222|gb|CP003726.1|     Enterococcus faecalis D32, complete genome      other   NoFamily
 $lineage = "cellular organisms; Bacteria; Firmicutes; Bacilli; Lactobacillales; Enterococcaceae; Enterococcus; Enterococcus faecalis; Enterococcus faecalis D32";
