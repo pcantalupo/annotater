@@ -285,7 +285,8 @@ sub Taxonomy {
 
 		my $seqio = Bio::SeqIO->new(-file => $fasta_outfile, -format => 'fasta');
 		while (my $seqobj = $seqio->next_seq) {
-			$acc{$db}{$seqobj->primary_id} = $seqobj->desc;
+			(my $primary_id = $seqobj->primary_id) =~ s/^lcl\|//;  # some versions of blastdbcmd prepend accession number with 'lcl|'
+			$acc{$db}{$primary_id} = $seqobj->desc;
 		}
 		unlink($gis_outfile, $fasta_outfile);
 	}
