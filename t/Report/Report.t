@@ -15,8 +15,7 @@ BEGIN {
   use_ok('Annotator::Report');
 }
 
-my $refseqs = {"viral.1.protein"   => "$ENV{BLASTDB}/viral.1.protein.faa",
-                 "viral.1.1.genomic" => "$ENV{BLASTDB}/viral.1.1.genomic.fna"};
+my $refseqs = {"viral.1.1.genomic" => "report.wTax.seqs_from_vrs.fa"};
 
 my $ar = Annotator::Report->new(report => "report.wTax.tsv",
                                 refseqs => $refseqs,);

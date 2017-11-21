@@ -1,11 +1,11 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use diagnostics;
 use SeqUtils;
 use Getopt::Long;
 use Bio::Seq;
 use Segmasker;
+use Bio::DB::Fasta;
 
 # This script adds 4 columns to Annotator report file.
 # qent     - entropy of the query sequence
@@ -20,8 +20,11 @@ GetOptions ('file|f=s%'      => \$refseqs,
             'header|h'      => \$header,
             'increase|i=i' => \$increase_field_index,
           ) or &usage;
+
+my $fasta_db;
 foreach my $algo (keys %$refseqs) {
   &usage if (!$refseqs->{$algo} || !-e $refseqs->{$algo});
+  $fasta_db->{$algo} = Bio::DB::Fasta->new($refseqs->{$algo});  # create an *.index
 }
 my ($seq_col, $subjid_col, $db_col, $qs_col, $qe_col, $ss_col, $se_col) =
       map { $_ + $increase_field_index } (2,7,14,15,16,17,18);
@@ -32,14 +35,14 @@ sub usage {
 
 $0 -f BLASTDB=FILE [-f ...] [-h -i]
 
-  -f BLASTDB=FILE Specify fasta file for each blast database in the algorithm field. Format is:
+  -f BLASTDB=FILE Specify fasta file for each blast database in the 'db' field. Format is:
                   -f viral.1.1.genomic=/PATH/TO/SEQS.fna -f viral.1.protein=/PATH/TO/SEQS.faa
   -h              The first row is the column names (default: no)
   -i INT          Number of non-Annotator columns at the beginning of the file. This might occur if
                   you inserted an analysisID or other metagenome identifier in the first column. Therefore,
                   you would need to add '-i 1' to command line. This will increase the field indexes by 1
 
-  
+
 HEREDOC
   print $output;
   exit;
@@ -53,7 +56,7 @@ while (<>) {
   my $sequence = $F[$seq_col-1];
   my $subjid   = $F[$subjid_col-1];
   my ($qs, $qe, $ss, $se) = @F[($qs_col-1, $qe_col-1, $ss_col-1, $se_col-1)];
-  
+
   # Query_hsp entropy
   my $qhsp_ent = -1;
   if ($qs && $qe) {
@@ -71,7 +74,7 @@ while (<>) {
       my $s = ($ss, $se)[$ss >  $se];
       my $e = ($ss, $se)[$ss <= $se];
 
-      my $tmp = faidxsubstr($refseqs->{$algo}, $subjid, $s, $e);
+      my $tmp = getsubstr($fasta_db->{$algo}, $subjid, $s, $e);
       $tmp =~ s/^>.+?\n//;
       $tmp =~ s/\n//g;
       my $shsp_seqobj = Bio::Seq->new(-seq => $tmp);
@@ -95,14 +98,17 @@ while (<>) {
     }
   }
 
-  print join("\t", @F); 
+  print join("\t", @F);
   printf "\t%.0f\t%.0f\t%.0f\t%.0f\n", entropy($sequence), $qhsp_ent, $shsp_ent, $shsp_perlc;
 }
 
-sub faidxsubstr {
-  my ($refseqs, $id, $s, $e) = @_;
-  my $command = "samtools faidx $refseqs '$id:$s-$e'";
-  my $seq = `$command`;
-  return $seq;
-}
+# remove indexes
+foreach my $algo (keys %$refseqs) { unlink( $fasta_db->{$algo}{index_name} ) }
 
+exit 0;
+
+sub getsubstr {
+  my ($db, $id, $s, $e) = @_;
+  my $seqstr = $db->seq($id, $s => $e);
+  return $seqstr;
+}
