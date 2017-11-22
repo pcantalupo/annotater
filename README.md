@@ -13,11 +13,9 @@ Install the following and make sure they are working before proceeding:
     + Bio::LITE::Taxonomy
     + Bio::LITE::Taxonomy::NCBI
     + Bio::LITE::Taxonomy::NCBI::Gi2taxid
-    + Test::File
 + [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy)
-+ [BLAST+](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
++ [BLAST+ >= 2.6.0](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
     + If you are going to put your BLAST databases in a single folder, add that directory to your `BLASTDB` variable.
-+ [samtools](https://sourceforge.net/projects/samtools/files/samtools/0.1.19/) version 0.1.19
 
 ## Installation
 
@@ -68,4 +66,3 @@ Let’s look at an example where there are three annotation steps. The restart f
 | 1  | 0,0 | 0,0 |
 | 2  | 0,0 | 0,1 |
 | 3  | 0,1 | 0,2 |
-
