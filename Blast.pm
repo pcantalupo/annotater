@@ -35,7 +35,7 @@ sub Build{
 	my %params;
 	my $command;
 	my $outfmt_s = $self->{'outfmt_s'};
-	my $outfmt = '-outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qcovs qcovhsp';
+	my $outfmt = '-outfmt "6 std qlen slen qcovs qcovhsp';
 	$outfmt .= " $outfmt_s" if defined($outfmt_s);
 	$outfmt .= '"';
 	$command = join(' ',$self->{'exec'},'-show_gis',"-num_threads",
