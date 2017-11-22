@@ -52,7 +52,7 @@ $ra = Reann->new( {     'config' => 'tag.conf',
 		);
 $ra->run;
 $size = -s("ann.0.0.tblastx");
-ok( $size > 450 && $size < 600,      "TAGFASTA: tblastx output file size");
+ok( $size > 575 && $size < 625,      "TAGFASTA: tblastx output file size: $size");
 
 $ra->Report;
 is( -e("ann.report.txt"),     1,       "TAGFASTA: report file exists");
