@@ -330,13 +330,15 @@ sub gi2lineage {
    my @lineage = ();
    
    my $taxid;
+   my $max = 3;   # max number attempts to get taxid from NCBI
+   my $i   = 0;
    do {
       undef $@;
       eval { $taxid = gi2taxid($gi); };   # gi2taxid from this module
-   } while ($@);
+   } while ($@ && ++$i <= $max);
    
    unless (defined $taxid) {
-      print STDERR $_, "\tError: No Taxid found\n";
+      print STDERR "gi2lineage: Problem getting taxid from GI:$gi :\n$@";
       return "";
    }
    
