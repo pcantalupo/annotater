@@ -26,6 +26,33 @@ In order to use the NCBI Taxonomy database, set the following environmental vari
 2. `PGT` - same as `NGT` but to the protein dictionary file
 3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
 
+## Output
+
+The annotated output file is `./annotater/ann.wTax.BE.report.txt`. The description of the fields is as follows:
+1. seqID - sequence identifier
+2. seq - sequence
+3. seqLength - sequence length
+4. pid - Percent identity of the alignment
+5. coverage - Percent of the query that participates in the alignment
+6. e - Evalue of the alignment
+7. accession - the accession number of the subject (a.k.a. hit) sequence in the database (see Column ‘db’).
+8. desc - the description of the subject sequence
+9. type - the taxonomic bin of the subject sequence. Possible values: virus (meaning eukaryotic viruses), phage, bacteria, human, mouse, fungi, and other. 
+10. family - the virus family
+11. species - the species name of the subject
+12. genome - the genome type of the virus 
+13. algorithm - the search algorithm used for this alignment
+14. db - the database used by the algorithm to search for an alignment of the contig
+15. qstart - the starting base in the query that participates in the alignment
+16. qend - the ending base in the query that participates in the alignment
+17. sstart - the starting base in the subject that participates in the alignment
+18. send - the ending base in the subject that participates in the alignment
+19. nsf - non-stop frame. If the value is 1, there is at least one frame in the contig that does not have a stop-codon.
+20. qent - nucleotide entropy of the query
+21. qhsp_ent - nucleotide entropy of the query sequence from Qstart to Qend, inclusive
+22. shsp_ent - nucleotide entropy of the subject sequence from Sstart to Send, inclusive
+23. shsp_%lc - percent of low complexity amino acids in the subject sequence from Sstart to Send, inclusive
+
 ## Developer info
 
 ### Reann->new()
