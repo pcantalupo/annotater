@@ -17,6 +17,10 @@ Install the following and make sure they are working before proceeding:
 + [BLAST+ >= 2.6.0](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
     + If you are going to put your BLAST databases in a single folder, add that directory to your `BLASTDB` variable.
 
+### Optional
+
++ [Rapsearch2 >= 2.24](https://sourceforge.net/projects/rapsearch2/files/)
+
 ## Installation
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
