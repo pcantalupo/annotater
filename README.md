@@ -21,7 +21,30 @@ Install the following and make sure they are working before proceeding:
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
 
-In order to use the NCBI Taxonomy database, set the following environmental variables:
+### NCBI Taxonomy database
+
+Get the Taxonomy files
+```
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_nucl.dmp.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_prot.dmp.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxcat.tar.gz &
+```
+
+Unzip each GZ file
+`for file in *gz; do echo $file; gunzip $file; done`
+
+Untar the tar archives
+```
+tar xvf taxcat.tar
+tar xvf taxdump.tar
+```
+
+Convert DMP file to BIN file for Bio::LITE::Taxonomy::NCBI::Gi2taxid module.
+See https://github.com/pcantalupo/mytaxonomy
+`makebin.pl &`
+
+Then set the following environmental variables:
 1. `NGT` - full path to the gi_taxid_nucl dictionary that was created with the Bio::LITE::Taxonomy::NCBI::Gi2taxid module
 2. `PGT` - same as `NGT` but to the protein dictionary file
 3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
