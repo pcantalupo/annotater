@@ -2,7 +2,20 @@
 
 Got sequences that need annotated with various BLAST programs? Look no further.
 
-## Dependencies
+## Quick Start
+
+```
+perl Makefile.PL
+make
+make test
+make install
+```
+
+If you encounter errors check below for the necessary dependencies that are required.
+
+Run annotater: `Reann.pl -file YOURSEQUENCES.FA -config CONFIGFILE -tax`. Your results are found in `annotator/ann.wTax.BE.report.txt` (yeah, I know the name needs changed).
+
+## Installation
 
 Install the following and make sure they are working before proceeding:
 
@@ -16,12 +29,7 @@ Install the following and make sure they are working before proceeding:
 + [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy)
 + [BLAST+ >= 2.6.0](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
     + If you are going to put your BLAST databases in a single folder, add that directory to your `BLASTDB` variable.
-
-### Optional
-
-+ [Rapsearch2 >= 2.24](https://sourceforge.net/projects/rapsearch2/files/)
-
-## Installation
++ [Rapsearch2 >= 2.24](https://sourceforge.net/projects/rapsearch2/files/) (optional)
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
 
@@ -53,9 +61,47 @@ Then set the following environmental variables:
 2. `PGT` - same as `NGT` but to the protein dictionary file
 3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
 
-## Output
+## Configuration
 
-The annotated output file is `./annotater/ann.wTax.BE.report.txt`. The description of the fields is as follows:
+Annotater requires two input files: a fasta file and a configuration file. There are example configuration files in `./configs`. The configuration that I use most often is `./configs/annot.rapsearch.conf`. Let's have a peek at its contents:
+
+```
+-exec blastn -db human_genomic -qc 50 -pid 80 -lcase_masking -max_target_seqs 2
+-exec blastn -db nt -qc 50 -pid 80
+-exec rapsearch -s f -d /mnt/mobydisk/groupshares/jpipas/pgc92/refs/blast/nr
+-exec tblastx -db viral.1.1.genomic
+```
+
+Each line specifies a different Search, either a blast program (blastn, tblastx) or Rapsearch, with its associated parameters. The searches are run in serial fashion starting from the top. Each line must start with `-exec` to tell Annotater which search program to run. Currently only BLAST+ and Rapsearch are supported. The options `-qc`, query coverage, and `-pid`, percent identity, are specific to Annotater. Query coverage and percent identity specificies the minimum % query coverage and % identity for a hit to be significant. The remaining parameters are specific to each search program; check the appropriate documentation for available options.
+
+## Usage
+
+Lets annotate the following sequence file `e7.fa` (the E7 gene from [HPV16](https://www.ncbi.nlm.nih.gov/nuccore/NC_001526.2)) with Annotater against the NCBI reference virus genomes.
+
+```
+>e7
+atgcatggagatacacctacattgcatgaatatatgttagatttgcaaccagagacaactgatctctactgttatgagcaattaaatgacagctcagaggaggaggatgaaatagatggtccagctggacaagcagaaccggacagagcccattacaatattgtaaccttttgttgcaagtgtgactctacgcttcggttgtgcgtacaaagcacacacgtagacattcgtactttggaagacctgttaatgggcacactaggaattgtgtgccccatctgttctcagaaaccataa
+```
+
+Then download the [reference virus genomes BLAST database](ftp://ftp.ncbi.nlm.nih.gov/blast/db/ref_viruses_rep_genomes.tar.gz) and extract it. Next, create a configuration file called `config.txt` that contains:
+
+```
+-exec blastn -db /PATH/TO/ref_viruses_rep_genomes
+```
+
+You have to specify a full path to the database file unless you place the database files in your `$BLASTDB` directory. Then run Annotater with 4 threads and set an evalue cutoff of 1e-50.
+
+`Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50`
+
+Options such as `-num_threads` and `-evalue` will be applied to each Search in the configuration file.  The results are found in the file `./annotater/ann.wTax.BE.report.txt` (field descriptions are below). 
+
+### Taxonomy module
+In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `report.txt` file. This is because we didn't tell Annotater to run the Taxonomy module. If you want taxonomy information about each subject such as type (i.e. bacteria, virus, etc...), virus family, species, genome type (i.e. ssRNA+, etc...), rerun the Annotater command line but this time add the parameter `-tax`. Since Annotater kept track of what searches were completed, it will skip running BLASTN again on the sequence and start immediately on determining the taxonomy information. 
+
+`Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50 -tax`
+
+### Annotater Report.txt file field descriptions:
+
 1. seqID - sequence identifier
 2. seq - sequence
 3. seqLength - sequence length
