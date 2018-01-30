@@ -111,7 +111,7 @@ our $VERSION = '0.01';
 use parent qw(Bio::Root::Root);
 
 BEGIN {
-  @SWITCHES = qw(REPORT NOTAX HEADER REFSEQS); 
+  @SWITCHES = qw(REPORT NOTAX HEADER REFSEQS);
   # Authorize attribute fields
   foreach my $attr ( @SWITCHES ) {  $OK_FIELD{$attr}++;  }
 
@@ -143,7 +143,7 @@ Title   : new
 Usage   : $ar->new(report => $reportfile, -verbose => 1)
               use -verbose (mind the '-') for Bio::Root::Root.pm
 Function:
-Returns : 
+Returns :
 Args    : self
 
 =cut
@@ -159,11 +159,11 @@ sub new {
     next if ($attr =~ /^-/);
     $self->$attr($value);
   }
-  
+
   unless ($self->{REPORT} && -e $self->{REPORT}) {
     $self->throw("Specify a proper report file with 'report => \$file'");
   }
-  
+
   # check if header row is present in report file
   open (my $in, "<", $self->{REPORT});
   my $fl = <$in>;
@@ -171,7 +171,7 @@ sub new {
     $self->{HEADER} = 1;
   }
   close ($in);
-  
+
   return $self;
 }
 
@@ -202,11 +202,11 @@ sub run_entropy {
   }
   else {
     $error = 1;
-  }  
+  }
   $self->throw("Reference sequence file(s) (refseqs => {db => \$file, ...}) was not specified during method call or file(s) do not exist") if ($error);
 
   my ($fh, $filename) = tempfile();
-  print "temp file is $filename\n";
+  #print "temp file is $filename\n";
   my $header = ''; $header = '-h' if ($self->{HEADER});
   my @f_option;
   foreach my $db (keys %{$self->{REFSEQS}}) {
@@ -234,7 +234,7 @@ sub pass_filters {
   unless ($self->{TEMP_ENTROPYFILE} || exists $args{use_report} ) {
     $self->run_entropy(%args);
   }
-  
+
   my $fh;
   if (exists $args{use_report}) {
     open ($fh, "<", $self->{REPORT});    # Report file has entropy values
@@ -242,7 +242,7 @@ sub pass_filters {
   else {
     open ($fh, "<", $self->{$TEMP_ENTROPYFILE});
   }
-  
+
   my $passed = $self->pass_entropy( use_report => 1 );
 
   $passed = $self->remove_baculo_artifact( report => $passed );
@@ -266,7 +266,7 @@ sub pass_filters {
 
 sub remove_baculo_artifact {
   my ($self, %args) = @_;
-  
+
   my %baculo;
   foreach my $row ( @{ $args{report} } ) {
     my @fields = split ("\t", $row);
@@ -274,7 +274,7 @@ sub remove_baculo_artifact {
       $baculo{$fields[7]}++;   # index 7 is the 'Subject description'
     }
   }
-  
+
   # If there is only one Baculo subject description, change Baculo rows to unannotated.
   if (keys %baculo == 1) {
     foreach my $row ( @{ $args{report} } ) {
@@ -288,8 +288,8 @@ sub remove_baculo_artifact {
       $row = join ("\t", @fields);
     }
   }
-  
-  return $args{report};   
+
+  return $args{report};
 }
 
 
@@ -307,11 +307,11 @@ sub remove_baculo_artifact {
 # Does not return the report header
 sub pass_entropy {
   my ($self, %args) = @_;
-  
+
   unless ($self->{TEMP_ENTROPYFILE} || exists $args{use_report} ) {
     $self->run_entropy(%args);
   }
-  
+
   my $fh;
   if (exists $args{use_report}) {
     open ($fh, "<", $self->{REPORT});    # Report file has entropy values
@@ -319,22 +319,22 @@ sub pass_entropy {
   else {
     open ($fh, "<", $self->{$TEMP_ENTROPYFILE});
   }
-  
+
   my $toReturn;
   my $ENT_MIN = 65; my $LC_MAX  = 50;
   while (<$fh>) {
     chomp;
-    next if ($. == 1 && $self->{HEADER});    
+    next if ($. == 1 && $self->{HEADER});
     my @fields = split (/\t/, $_);
-    
+
     my @query_ent = ($fields[-4], $fields[-3]);
     my $shsp_ent = $fields[-2];
     my $shsp_lc  = $fields[-1];
     if (
-            (    # unassigned sequence does not have a Qhsp_ent ($query_ent[1]) 
+            (    # unassigned sequence does not have a Qhsp_ent ($query_ent[1])
               $query_ent[0] > $ENT_MIN && $query_ent[1] == -1
-            )    
-        || 
+            )
+        ||
             (    # for all hits that are not unassigned
               min(@query_ent) > $ENT_MIN
               && ($shsp_ent == -1 || $shsp_ent > $ENT_MIN)
