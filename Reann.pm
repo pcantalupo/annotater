@@ -271,6 +271,7 @@ sub Taxonomy {
 		my ($acc, $db) = (split (/\t/, $_, -1))[6,8];
 		$acc{$db}{$acc}++ unless ($acc eq "");
 	}
+
 	foreach my $db (keys %acc) {
 		print "\tGetting fasta seqs for $db\n";
 		my $gis_outfile = "$db.gis.txt";
@@ -281,6 +282,7 @@ sub Taxonomy {
 		close TMPOUT;
 
 		my $fasta_outfile = $gis_outfile . ".fa";
+		$self->{dbfastafile}{$db} = $fasta_outfile;   # save fasta filename for each database; these files will be used in add_entropy()
 		`blastdbcmd -db $db -entry_batch $gis_outfile > $fasta_outfile`;
 
 		my $seqio = Bio::SeqIO->new(-file => $fasta_outfile, -format => 'fasta');
@@ -288,7 +290,7 @@ sub Taxonomy {
 			(my $primary_id = $seqobj->primary_id) =~ s/^lcl\|//;  # some versions of blastdbcmd prepend accession number with 'lcl|'
 			$acc{$db}{$primary_id} = $seqobj->desc;
 		}
-		unlink($gis_outfile, $fasta_outfile);
+		unlink($gis_outfile);
 	}
 
 	#
@@ -351,10 +353,10 @@ sub Taxonomy {
 }
 
 sub add_entropy {
+	print "Entropy\n";
   my ($self, %args) = @_;
 
-  my $refseqs = { # "viral.1.protein"   => "$ENV{BLASTDB}/viral.1.protein.faa",
-                 "viral.1.1.genomic" => "$ENV{BLASTDB}/viral.1.1.genomic.fna"};
+  my $refseqs = $self->{dbfastafile};
 
   my $entropyReport = $self->{prefix} . ".wTax.BE." . $self->{output};
   if (-e $self->{taxout}) {
@@ -368,6 +370,12 @@ sub add_entropy {
     print "Add_entropy will not run since Reann taxReport does not exist.\n";
     return
   }
+
+	# delete db fasta files
+	foreach my $db ( keys %{ $self->{dbfastafile} } ) {
+		print "\tDeleting db fastafile: ", $self->{dbfastafile}->{$db}, $/;
+		unlink ($self->{dbfastafile}->{$db});
+	}
 }
 
 
