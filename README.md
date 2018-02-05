@@ -57,8 +57,8 @@ See https://github.com/pcantalupo/mytaxonomy
 `makebin.pl &`
 
 Then set the following environmental variables:
-1. `NGT` - full path to the gi_taxid_nucl dictionary that was created with the Bio::LITE::Taxonomy::NCBI::Gi2taxid module
-2. `PGT` - same as `NGT` but to the protein dictionary file
+1. `NGT` - full path to the gi_taxid_nucl .bin file that was created with the Bio::LITE::Taxonomy::NCBI::Gi2taxid module
+2. `PGT` - same as `NGT` but to the gi_taxid_prot .bin file
 3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
 
 ## Configuration
