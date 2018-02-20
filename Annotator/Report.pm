@@ -376,9 +376,13 @@ sub AUTOLOAD {
 
 sub DESTROY {
   my $self = shift;
-  my $fh = $self->{$TEMP_ENTROPYFH};
-  close $fh;
-  unlink $self->{$TEMP_ENTROPYFILE};
+
+  if ($self->{$TEMP_ENTROPYFH}) {
+    close $self->{$TEMP_ENTROPYFH};
+  }
+  if ($self->{$TEMP_ENTROPYFILE}) {
+    unlink $self->{$TEMP_ENTROPYFILE};
+  }
 }
 
 
