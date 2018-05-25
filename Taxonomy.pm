@@ -19,14 +19,14 @@ Taxonomy - gets taxonomy information from NCBI (and other stuff too...)
 
   use strict;
   use Taxonomy;
-  
+
   # get a GI from an accession
   # accession can be several different formats: J02400, gb|J02400|
-  
+
   my $acc = 'J02400';
   my $gi = acc2gi($acc);
   print $gi, "\n";
-  
+
   # get a Taxid from a GI
   my $taxid = gi2taxid($gi);
 
@@ -143,11 +143,11 @@ my $NOFAMILY = "NoFamily";
  Args     : an accession number in the following formats:
             J02400     - naked accession
             gb|J02400| - full fasta identifier (gotta be a better name for this)
-            
+
             May not work with all non-genbank accession numbers. For
             example, it does not work with naked PDB accession numbers like
             2FL8 but OK if it is the full fasta identifier: pdb|2FL8|A
- Errors   : When submitting a malformed request (i.e. an invalid accession 
+ Errors   : When submitting a malformed request (i.e. an invalid accession
             number like 'XYZ', method will throw an error and exit)
 
 =cut
@@ -158,7 +158,7 @@ sub accession2gi {
    # "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide
    # &retmode=text&id=gb%7CJ02400.1%7C&rettype=gi&tool=BioPerl&email=pcantalupo%40gmail.com"
 
-   my ($acc) = @_; 
+   my ($acc) = @_;
    return unless ($acc);
 
    my $factory = Bio::DB::EUtilities->new(-eutil => 'efetch',
@@ -170,7 +170,7 @@ sub accession2gi {
 
    chomp $gi;
    return $gi;
-}   
+}
 
 
 =head2 gi2acc
@@ -219,9 +219,9 @@ sub gi2taxid {
 
    my ($gi, $database) = @_;
    return unless ($gi);
-   
+
    $database ||= "nucleotide";
- 
+
    my $factory = Bio::DB::EUtilities->new(-eutil => 'esummary',
                                           -email => 'pcantalupo@gmail.com',
                                           -db => $database,
@@ -249,11 +249,11 @@ sub gi2taxid {
  Function : Returns the lineage of a Taxid
  Returns  : List context: an array containing the lineage information from General to Specific
             Scalar context: elements of the array are joined with '; ' (mind the space)
- 
+
             If the Tax ID is not found, returns "Empty id list - nothing
             todo" and returns undef if the argument is NOT true (i.e.  '',
             0, undef)
- 
+
  Args     : a Taxid (Taxonomy database ID)
 
 =cut
@@ -262,11 +262,11 @@ sub gi2taxid {
 sub taxid2lineage {
    # here is an example of the URL that this subroutine will send (i.e. SV40):
    # http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&
-   # id=10633&email=pcantalupo%40gmail.com&retmode=xml 
-   
+   # id=10633&email=pcantalupo%40gmail.com&retmode=xml
+
    my ($id) = @_;
    return unless ($id);
-   
+
    my $factory = Bio::DB::EUtilities->new(-eutil => 'efetch',
                                           -db    => 'taxonomy',
                                           -email => 'pcantalupo@gmail.com',
@@ -274,14 +274,14 @@ sub taxid2lineage {
                                           );
 
    my $res = $factory->get_Response->content;
-   my $data = XMLin($res);   
+   my $data = XMLin($res);
    if (!ref($data)) {
       # if a Tax id doesn't exist in the Taxonomy database, the string
       # "<ERROR>Empty id list - nothing todo</ERROR>" is returned and $data
-      # becomes "Empty id list - nothing todo". Therefore, just return the 
+      # becomes "Empty id list - nothing todo". Therefore, just return the
       # string value of $data back to caller who can deal with it
-      return $data;   
-   } 
+      return $data;
+   }
 
    # Lineage tag in XML has a value that matches structure of the ORGANISM
    # field in Genbank records  (i.e.  Viruses; dsDNA viruses; Polyomaviridae,
@@ -301,7 +301,7 @@ sub taxid2lineage {
    if ($id == 12440) {
       $lineage = join("; ", "phage", "Inoviridae", "Non-A, non-B hepatitis virus");
    }
-   
+
    return wantarray ? split(/; /, $lineage) : $lineage;
 }
 
@@ -317,9 +317,9 @@ sub taxid2lineage {
 
             If cannot get Taxid or Lineage, returns "".
             If argument to subroutine is NOT true (i.e. '', 0, undef), returns undef
-             
+
  Args     : a GI number
- 
+
 =cut
 
 
@@ -328,7 +328,7 @@ sub gi2lineage {
    return unless ($gi);
 
    my @lineage = ();
-   
+
    my $taxid;
    my $max = 3;   # max number attempts to get taxid from NCBI
    my $i   = 0;
@@ -336,12 +336,12 @@ sub gi2lineage {
       undef $@;
       eval { $taxid = gi2taxid($gi); };   # gi2taxid from this module
    } while ($@ && ++$i <= $max);
-   
+
    unless (defined $taxid) {
       print STDERR "gi2lineage: Problem getting taxid from GI:$gi :\n$@";
       return "";
    }
-   
+
    do {
       undef $@;
       eval { @lineage = taxid2lineage($taxid); };   # taxid2lineage from this module
@@ -363,12 +363,12 @@ sub gi2lineage {
  Title    : lineage2tfs
  Usage    : ($type, $family, $species) = lineage2tfs($lineage);
  Function : To determine the Type, Family and Species from a Lineage
- 
+
  Returns  : An array (type, family, species). 'Type' values are human,
             mouse, phage, virus, bacteria, fungi, and other.  If no family
             is found then family = 'NoFamily'.  Returns undef if the
             argument is NOT true
-             
+
  Args     : String that is delimited by '; ' (i.e. Viruses; dsDNA;
             Parvoviridae).  The lineage string must go from General to
             Specific with the last field being the Species name
@@ -377,10 +377,10 @@ sub gi2lineage {
 
 sub lineage2tfs {
 
-   my $lineage = shift;  
+   my $lineage = shift;
    return unless ($lineage);
 
-   my @taxa = split (/; /, $lineage);   
+   my @taxa = split (/; /, $lineage);
    my $species     = $taxa[-1];
 
    # Improperly classified agents list
@@ -402,11 +402,11 @@ sub lineage2tfs {
       my $type = "virus";   # default to virus unless we prove it is a phage
 
       $type = $PHAGE if is_phage(@taxa);
-      
-      return ($type, 
+
+      return ($type,
                get_virus_family(@taxa[0..$#taxa-1]),
                $species);
-   }  
+   }
 
    # Check for Bacteria/Archaea
    if ($taxa[1] eq "Bacteria") {
@@ -414,20 +414,20 @@ sub lineage2tfs {
    } elsif ($taxa[1] eq "Archaea") {
       return ("archaea", $NOFAMILY, $species);
    }
-     
+
    # Check for Human and Fungi
    # 1. check for human
    if ($species =~ /Homo sapiens/i) {
       return ("human", $NOFAMILY, $species);
    }
-   
+
    # 2. check for fungi
    foreach my $taxa (@taxa) {
       if ($taxa eq "Fungi") {
          return ("fungi", $NOFAMILY, $species);
       }
    }
-         
+
    # Return 'other' type for the 'Other', and 'Unclassified'
    # kingdoms plus the subset of Eukaryota that are not Human or Fungi
    return ("other", $NOFAMILY, $species);
@@ -441,7 +441,7 @@ sub lineage2tfs {
  Usage    : $virusfamily = get_virus_family(@lineage);
  Function : Get the first 'viridae', 'virus', or 'virales' from the lineage
             array (General to Specific).
- Returns  : A string (family name)  
+ Returns  : A string (family name)
  Args     : An ordered array from General to Specific.  Also the array
             should not have a species name as the last element of the array
             unless the caller really wants to parse that field for a family
@@ -450,9 +450,9 @@ sub lineage2tfs {
 =cut
 
 sub get_virus_family {
-   
+
    my @taxa = @_;
-   
+
    my $viridae = '';
    my $virus   = '';
    my $virales = '';
@@ -490,9 +490,9 @@ sub get_virus_family {
 
 sub is_phage {
    my @taxa = @_;
-   
+
    my $species = pop @taxa;
-   
+
    # check known phage families first
    if (is_phage_family( get_virus_family(@taxa) )) {
       return 1;
@@ -506,7 +506,7 @@ sub is_phage {
          }
       }
    }
-   
+
    return 0;
 }
 
@@ -522,7 +522,7 @@ sub is_phage {
 =cut
 
 sub is_phage_family {
-   my $family = shift;   
+   my $family = shift;
    return unless ($family);
 
    my @PHAGEFAMS = qw/  Ampullaviridae
@@ -545,7 +545,9 @@ sub is_phage_family {
                         Rudiviridae
                         Siphoviridae
                         Sphaerolipoviridae
+                        Spiraviridae
                         Tectiviridae
+                        Tristromaviridae
                         Turriviridae/;
 
 
@@ -563,7 +565,7 @@ sub is_phage_family {
  Function : Obtain the genome type of the argument
  Returns  : A string - if family is not found or is "NoFamily", returns "Unknown"
  Args     : A string (virus family name)
- 
+
 =cut
 
 sub get_genome_type {
@@ -576,15 +578,20 @@ sub get_genome_type {
                   # unknown
                   NoFamily => 'Unknown',
                   Satellites => 'Unknown',
-                
+
                   # ssDNA
                   Anelloviridae 	=> 'ssDNA,circular,nonsegmented',
+                  Bidnaviridae => 'ssDNA,linear,segmented',
                   Circoviridae 		=> 'ssDNA,circular,nonsegmented',
                   Geminiviridae 	=> 'ssDNA,circular,both',
+                  Genomoviridae => 'ssDNA,circular,nonsegmented',
                   Inoviridae 		=> 'ssDNA,circular,nonsegmented',
                   Microviridae 		=> 'ssDNA,linear,nonsegmented',
                   Nanoviridae 		=> 'ssDNA,circular,nonsegmented',
                   Parvoviridae		=> 'ssDNA,linear,nonsegmented',
+                  Pleolipoviridae => 'ssDNA,circular,nonsegmented',
+                  Spiraviridae    => 'ssDNA,circular,nonsegmented',
+                  Tolecusatellitida => 'ssDNA,circular,nonsegmented',
 
                   # dsDNA
                   Adenoviridae 		=> 'dsDNA,linear,nonsegmented',
@@ -594,22 +601,23 @@ sub get_genome_type {
                   Baculoviridae 	=> 'dsDNA,circular,nonsegmented',
                   Bicaudaviridae 	=> 'dsDNA,circular,nonsegmented',
                   Caudovirales		=> 'dsDNA,linear,nonsegmented',
-                  Caulimoviridae 	=> 'dsDNA,circular,nonsegmented',
+                  Caulimoviridae 	=> 'dsDNA RT,circular,nonsegmented',
                   Corticoviridae 	=> 'dsDNA,circular,nonsegmented',
                   Fuselloviridae 	=> 'dsDNA,circular,nonsegmented',
                   Globuloviridae 	=> 'dsDNA,linear,nonsegmented',
                   Guttaviridae   	=> 'dsDNA,circular,nonsegmented',
                   Herpesviridae 	=> 'dsDNA,linear,nonsegmented',
-                  Hepadnaviridae        => 'dsDNA,circular,nonsegmented',
+                  Hepadnaviridae        => 'dsDNA RT,circular,nonsegmented',
                   Hytrosaviridae        => 'dsDNA,circular,nonsegmented',
                   Iridoviridae 		=> 'dsDNA,linear,nonsegmented',
+                  Lavidaviridae => 'dsDNA,circular,nonsegmented',
                   Lipothrixviridae 	=> 'dsDNA,linear,nonsegmented',
                   Marseilleviridae      => 'dsDNA,circular,nonsegmented',
+                  Malacoherpesviridae => 'dsDNA,linear,nonsegmented',
                   Mimiviridae 		=> 'dsDNA,linear,nonsegmented',
                   Myoviridae 		=> 'dsDNA,linear,nonsegmented',
                   Nimaviridae 		=> 'dsDNA,circular,nonsegmented',
                   Nudiviridae           => 'dsDNA,circular,nonsegmented',
-                  Nudivirus 		=> 'dsDNA,circular,nonsegmented',
                   Papillomaviridae 	=> 'dsDNA,circular,nonsegmented',
                   Phycodnaviridae 	=> 'dsDNA,linear,nonsegmented',
                   Plasmaviridae 	=> 'dsDNA,circular,nonsegmented',
@@ -621,59 +629,100 @@ sub get_genome_type {
                   Siphoviridae 		=> 'dsDNA,linear,nonsegmented',
                   Sphaerolipoviridae =>'dsDNA,linear/circular,nonsegmented',
                   Tectiviridae 		=> 'dsDNA,linear,nonsegmented',
+                  Tristromaviridae => 'dsDNA,linear,nonsegmented',
                   Turriviridae 		=> 'dsDNA,linear,nonsegmented',
 
                   # dsRNA
+                  Amalgaviridae => 'dsRNA,linear,nonsegmented',
+                  Birnaviridae => 'dsRNA,linear,segmented',
+                  Chrysoviridae => 'dsRNA,linear,segmented',
                   Cystoviridae 		=> 'dsRNA,linear,segmented',
-                  Partitiviridae 	=> 'dsRNA,linear,segmented',
+                  Endornaviridae => 'dsRNA,linear,nonsegmented,14-17.6kb',
+                  Hypoviridae => 'dsRNA,linear,nonsegmented,9-13kb',
+                  Megabirnaviridae => 'dsRNA,linear,segmented,7-9kb each',
+                  Partitiviridae 	=> 'dsRNA,linear,segmented,1.4-3kb each',
                   Picobirnaviridae 	=> 'dsRNA,linear,segmented',
+                  Quadriviridae => 'dsRNA,linear,segmented,3-5kb each',
                   Reoviridae		=> 'dsRNA,linear,segmented',
                   Totiviridae 		=> 'dsRNA,linear,nonsegmented',
 
+                  # ssRNA(RT)
+                  Metaviridae => 'ssRNA(?,RT)',
+                  Pseudoviridae => 'ssRNA(?,RT)',
+                  Retroviridae 		=> 'ssRNA(+,RT),linear,nonsegmented',
+
                   # ssRNA(+)
-                  Alphaflexiviridae 	=> 'ssRNA(+),linear,nonsegmented',
-                  Astroviridae 		=> 'ssRNA(+),linear,nonsegmented',
-                  Bacillariornaviridae 	=> 'ssRNA(+),linear,nonsegmented',
-                  Betaflexiviridae 	=> 'ssRNA(+),linear,nonsegmented',
-                  Bromoviridae 		=> 'ssRNA(+),linear,segmented',
-                  Caliciviridae 	=> 'ssRNA(+),linear,nonsegmented',
-                  Closteroviridae 	=> 'ssRNA(+),linear,nonsegmented',
+                  # Nidovirales
+                  Arteriviridae => 'ssRNA(+),linear,nonsegmented',
+                  Coronaviridae => 'ssRNA(+),linear,nonsegmented,27-32kb',
+                  Mesoniviridae => 'ssRNA(+),linear,nonsegmented,20kb',
+                  Roniviridae => 'ssRNA(+),linear,nonsegmented,26kb',
+                  # Picornavirales
                   Dicistroviridae 	=> 'ssRNA(+),linear,nonsegmented',
-                  Flaviviridae 		=> 'ssRNA(+),linear,nonsegmented',    
-                  Hepeviridae 		=> 'ssRNA(+),linear,nonsegmented',                
                   Iflaviridae 		=> 'ssRNA(+),linear,nonsegmented',
-                  Labyrnaviridae 	=> 'ssRNA(+),linear,nonsegmented',
-                  Leviviridae 		=> 'ssRNA(+),linear,nonsegmented',
-                  Luteoviridae		=> 'ssRNA(+),linear,nonsegmented',
                   Marnaviridae 		=> 'ssRNA(+),linear,nonsegmented',
-                  Nodaviridae 		=> 'ssRNA(+),linear,segmented',
-                  Ourmiavirus 		=> 'ssRNA(+),linear,segmented',
                   Picornavirales 	=> 'ssRNA(+),linear,nonsegmented',
                   Picornaviridae 	=> 'ssRNA(+),linear,nonsegmented',
-                  Potyviridae 		=> 'ssRNA(+),linear,nonsegmented',
-                  Retroviridae 		=> 'ssRNA(+),linear,nonsegmented',
                   Secoviridae 		=> 'ssRNA(+),linear,segmented',
-                  Sobemovirus 		=> 'ssRNA(+),linear,nonsegmented',
-                  Tetraviridae		=> 'ssRNA(+),linear,nonsegmented',
+                  # Tymovirales
+                  Alphaflexiviridae 	=> 'ssRNA(+),linear,nonsegmented',
+                  Betaflexiviridae 	=> 'ssRNA(+),linear,nonsegmented',
+                  Gammaflexiviridae => 'ssRNA(+),linear,nonsegmented',
+                  Tymoviridae 		=> 'ssRNA(+),linear,nonsegmented',
+                  # Unassigned
+                  Alphatetraviridae => 'ssRNA(+),linear,both',
+                  Alvernaviridae => 'ssRNA(+),linear,nonsegmented',
+                  Astroviridae 		=> 'ssRNA(+),linear,nonsegmented',
+                  Barnaviridae => 'ssRNA(+),linear,nonsegmented',
+                  Benyviridae => 'ssRNA(+),linear,segmented',
+                  Bromoviridae 		=> 'ssRNA(+),linear,segmented',
+                  Caliciviridae 	=> 'ssRNA(+),linear,nonsegmented',
+                  Carmotetraviridae => 'ssRNA(+),linear,nonsegmented',
+                  Closteroviridae 	=> 'ssRNA(+),linear,nonsegmented',
+                  Flaviviridae 		=> 'ssRNA(+),linear,nonsegmented',
+                  Hepeviridae 		=> 'ssRNA(+),linear,nonsegmented',
+                  Leviviridae 		=> 'ssRNA(+),linear,nonsegmented',
+                  Luteoviridae		=> 'ssRNA(+),linear,nonsegmented',
+                  Narnaviridae => 'ssRNA(+),linear,nonsegmented,2.5-2.9kb',
+                  Nodaviridae 		=> 'ssRNA(+),linear,segmented',
+                  Permutotetraviridae => 'ssRNA(+),linear,nonsegmented,5.6kb',
+                  Potyviridae 		=> 'ssRNA(+),linear,nonsegmented',
+                  Sarthroviridae => 'ssRNA(+),linear,nonsegmented,0.8kb',
+                  Solinviviridae => 'ssRNA(+),linear,nonsegmented,10-11kb',
+                  Togaviridae => 'ssRNA(+),linear,nonsegmented,9.7-11.8kb',
                   Tobamovirus 		=> 'ssRNA(+),linear,nonsegmented',
                   Tombusviridae 	=> 'ssRNA(+),linear,nonsegmented',
-                  Tymoviridae 		=> 'ssRNA(+),linear,nonsegmented',
-                  Umbravirus 		=> 'ssRNA(+),linear,nonsegmented',
                   Virgaviridae		=> 'ssRNA(+),linear,nonsegmented',
-                  
+
                   # ssRNA(-)
-                  Arenaviridae		=> 'ssRNA(-),linear,segmented',
+                  # Mononegavirales
                   Bornaviridae 		=> 'ssRNA(-),linear,nonsegmented',
-                  Bunyaviridae 		=> 'ssRNA(-),linear,segmented',
                   Filoviridae		=> 'ssRNA(-),linear,nonsegmented',
-                  Orthomyxoviridae	=> 'ssRNA(-),linear,segmented',
-                  Rhabdoviridae 	=> 'ssRNA(-),linear,nonsegmented',
+                  Mymonaviridae => 'ssRNA(-),linear,nonsegmented',
+                  Nyamiviridae => 'ssRNA(-),linear,nonsegmented',
                   Paramyxoviridae	=> 'ssRNA(-),linear,nonsegmented',
+                  Pneumoviridae => 'ssRNA(-),linear,nonsegmented',
+                  Rhabdoviridae 	=> 'ssRNA(-),linear,nonsegmented',
+                  Sunviridae => 'ssRNA(-),linear,nonsegmented',
+                  # Bunyavirales
+                  Feraviridae => 'ssRNA(-),linear,segmented',
+                  Fimoviridae => 'ssRNA(-),linear,segmented',
+                  Hantaviridae => 'ssRNA(-),linear,segmented',
+                  Jonviridae => 'ssRNA(-),linear,segmented',
+                  Nairoviridae => 'ssRNA(-),linear,segmented',
+                  Phasmaviridae => 'ssRNA(-),linear,segmented',
+                  Phenuiviridae => 'ssRNA(-),linear,segmented',
+                  Peribunyaviridae => 'ssRNA(-),linear,segmented',
+                  Tospoviridae => 'ssRNA(-),linear,segmented',
+                  # Unassigned
+                  Arenaviridae		=> 'ssRNA(-),linear,segmented',
+                  Ophioviridae => 'ssRNA(-),linear,segmented',
+                  Orthomyxoviridae	=> 'ssRNA(-),linear,segmented',
                );
 
-   
+
    return $vf2genome{$family} if (exists $vf2genome{$family});
-   
+
    return $UNKNOWN;
 }
 
@@ -691,7 +740,3 @@ There are internal methods to Taxonomy
 
 
 1;
-
-
-
-
