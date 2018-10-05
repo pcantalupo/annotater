@@ -35,6 +35,15 @@ Install the following and make sure they are working before proceeding:
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
 
+### Docker installation
+
+You can build your own docker image by running `docker build -t annotater .` or you can download the annotater image from Docker Hub with `docker pull virushunter/annotater`
+
+To run the annotater image, do the following.
+
+`docker run -ti -v $(pwd):/tmp/dockertest -v /PATH/TO/blast_databases:/refs/blast virushunter/annotater bash`
+
+
 ## Configuration
 
 Annotater requires two input files: a fasta file and a configuration file. There are example configuration files in `./configs`. The configuration that I use most often is `./configs/annot.rapsearch.conf`. Let's have a peek at its contents:
