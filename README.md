@@ -1,6 +1,6 @@
 # annotater
 
-Got sequences that need annotated with various BLAST programs? Look no further.
+Got sequences that need annotated with various BLAST programs? [Rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/) is supported also.
 
 ## Quick Start
 
@@ -13,7 +13,7 @@ make install
 
 If you encounter errors check below for the necessary dependencies that are required.
 
-Run annotater: `Reann.pl -file YOURSEQUENCES.FA -config CONFIGFILE -tax`. Your results are found in `annotator/ann.wTax.BE.report.txt` (yeah, I know the name needs changed).
+Run annotater: `Reann.pl -file YOURSEQUENCES.FA -config CONFIGFILE -tax -remotetax`. These options tell annotater to search your sequences against the list of searches in your configuration file and to lookup taxonomy information (-tax) for subject hits by querying NCBI (-remotetax). Your results are found in `annotator/ann.wTax.BE.report.txt` (tab-delimited text).
 
 ## Installation
 
@@ -22,45 +22,18 @@ Install the following and make sure they are working before proceeding:
 + [Bioperl](http://bioperl.org/)
 + Perl modules
     + Bio::DB::EUtilities
+    + LWP::UserAgent
     + XML::Simple
     + Bio::LITE::Taxonomy
     + Bio::LITE::Taxonomy::NCBI
     + Bio::LITE::Taxonomy::NCBI::Gi2taxid
-+ [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy)
 + [BLAST+ >= 2.6.0](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
     + If you are going to put your BLAST databases in a single folder, add that directory to your `BLASTDB` variable.
 + [Rapsearch2 >= 2.24](https://sourceforge.net/projects/rapsearch2/files/) (optional)
     + I had trouble compiling Rapsearch2 and was getting weird evalues (issues [here](https://github.com/zhaoyanswill/RAPSearch2/issues/37#issuecomment-342584855) and [here](https://github.com/zhaoyanswill/RAPSearch2/issues/29#issuecomment-342583203))
++ [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy) (optional)
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
-
-### NCBI Taxonomy database
-
-Get the Taxonomy files
-```
-wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_nucl.dmp.gz &
-wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_prot.dmp.gz &
-wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz &
-wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxcat.tar.gz &
-```
-
-Unzip each GZ file
-`for file in *gz; do echo $file; gunzip $file; done`
-
-Untar the tar archives
-```
-tar xvf taxcat.tar
-tar xvf taxdump.tar
-```
-
-Convert DMP file to BIN file for Bio::LITE::Taxonomy::NCBI::Gi2taxid module.
-See https://github.com/pcantalupo/mytaxonomy
-`makebin.pl &`
-
-Then set the following environmental variables:
-1. `NGT` - full path to the gi_taxid_nucl .bin file that was created with the Bio::LITE::Taxonomy::NCBI::Gi2taxid module
-2. `PGT` - same as `NGT` but to the gi_taxid_prot .bin file
-3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
 
 ## Configuration
 
@@ -84,7 +57,7 @@ Lets annotate the following sequence file `e7.fa` (the E7 gene from [HPV16](http
 atgcatggagatacacctacattgcatgaatatatgttagatttgcaaccagagacaactgatctctactgttatgagcaattaaatgacagctcagaggaggaggatgaaatagatggtccagctggacaagcagaaccggacagagcccattacaatattgtaaccttttgttgcaagtgtgactctacgcttcggttgtgcgtacaaagcacacacgtagacattcgtactttggaagacctgttaatgggcacactaggaattgtgtgccccatctgttctcagaaaccataa
 ```
 
-Then download the [reference virus genomes BLAST database](ftp://ftp.ncbi.nlm.nih.gov/blast/db/ref_viruses_rep_genomes.tar.gz) and extract it. Next, create a configuration file called `config.txt` that contains:
+Then download the [reference virus genomes BLAST database](https://ftp.ncbi.nlm.nih.gov/blast/db/ref_viruses_rep_genomes.tar.gz) and extract it. Next, create a configuration file called `config.txt` that contains:
 
 ```
 -exec blastn -db /PATH/TO/ref_viruses_rep_genomes
@@ -97,7 +70,7 @@ You have to specify a full path to the database file unless you place the databa
 Options such as `-num_threads` and `-evalue` will be applied to each Search in the configuration file.  The results are found in the file `./annotater/ann.wTax.BE.report.txt` (field descriptions are below). 
 
 ### Taxonomy module
-In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `report.txt` file. This is because we didn't tell Annotater to run the Taxonomy module. If you want taxonomy information about each subject such as type (i.e. bacteria, virus, etc...), virus family, species, genome type (i.e. ssRNA+, etc...), rerun the Annotater command line but this time add the parameter `-tax`. Since Annotater kept track of what searches were completed, it will skip running BLASTN again on the sequence and start immediately on determining the taxonomy information. 
+In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `report.txt` file. This is because we didn't tell Annotater to run the Taxonomy module. If you want taxonomy information about each subject such as type (i.e. bacteria, virus, etc...), virus family, species, genome type (i.e. ssRNA+, etc...), rerun the Annotater command line but this time add the parameter `-tax`. However, if you don't have a local NCBI Taxonomy database properly installed (see below), add the option '-remotetax' as well (this query NCBI for taxonomy info). Since Annotater kept track of what searches were completed, it will skip running BLASTN again on the sequence and start immediately on determining the taxonomy information. 
 
 `Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50 -tax`
 
@@ -126,6 +99,36 @@ In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `rep
 21. qhsp_ent - nucleotide entropy of the query sequence from Qstart to Qend, inclusive
 22. shsp_ent - nucleotide entropy of the subject sequence from Sstart to Send, inclusive
 23. shsp_%lc - percent of low complexity amino acids in the subject sequence from Sstart to Send, inclusive
+
+### NCBI Taxonomy database (optional)
+
+Get the Taxonomy files
+```
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_nucl.dmp.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_prot.dmp.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxcat.tar.gz &
+```
+
+Unzip each GZ file
+`for file in *gz; do echo $file; gunzip $file; done`
+
+Untar the tar archives
+```
+tar xvf taxcat.tar
+tar xvf taxdump.tar
+```
+
+Convert DMP file to BIN file for Bio::LITE::Taxonomy::NCBI::Gi2taxid module.
+See https://github.com/pcantalupo/mytaxonomy
+`makebin.pl &`
+
+Then set the following environmental variables:
+1. `NGT` - full path to the gi_taxid_nucl .bin file that was created with the Bio::LITE::Taxonomy::NCBI::Gi2taxid module
+2. `PGT` - same as `NGT` but to the gi_taxid_prot .bin file
+3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
+
+
 
 ## Developer info
 
