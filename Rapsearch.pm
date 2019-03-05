@@ -122,7 +122,7 @@ sub ParseOutfmt{      # parse file containing Rapsearch results
       $idHash{$cols[1]} = 1;
       $report->{$cols[0]}{'qc'} = 100 * (abs($cols[6]-$cols[7]) + 1)/ $self->{'qlen'}{$cols[0]};
       $report->{$cols[0]}{'algorithm'} = $self->{'exec'};
-      ($report->{$cols[0]}{'db'} = $self->{'d'}) =~ s|^/.*/||;
+      $report->{$cols[0]}{'db'} = $self->{'d'};
       my @pos = @cols[6..9];
       $report->{$cols[0]}{'pos'} = \@pos;
     }
