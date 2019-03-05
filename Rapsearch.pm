@@ -111,6 +111,9 @@ sub ParseOutfmt{      # parse file containing Rapsearch results
     chomp;
     my @cols = split /\t/, $_;
     next if (scalar @cols < 12);
+
+    $cols[10] = clean_evalue($cols[10]);
+
     if($self->Pass(@cols)
               && (!$report->{$cols[0]} || $report->{$cols[0]}{'evalue'} > $cols[10])) {
       $report->{$cols[0]}{'evalue'} = $cols[10];
@@ -162,6 +165,23 @@ sub CalculateQueryLengths {
 }
 
 
+sub clean_evalue {
+  my ($e) = @_;
+
+  # zero evalue: 0x0p+0
+  # other examples:
+  #   0x1.3fa9b55ddbf92p-178
+  #   0x1.e49bd1ea65088p-134
+
+  $e =~ s/p(-|\+)/e-/g;   # convert p- or p+ to e-
+  $e =~ s/e-0$//;      # for a zero evalue
+  $e =~ /0x\d+(\.\S+)e-\d+$/;    # remove '.e49bd1ea65088'
+  if ($1) {
+    $e =~ s/$1//;
+  }
+  $e =~ s/^0x//;
+  return $e;
+}
 
 
 1;
