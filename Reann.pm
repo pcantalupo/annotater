@@ -274,7 +274,8 @@ sub Taxonomy {
 
 	foreach my $db (keys %acc) {
 		print "\tGetting fasta seqs for $db\n";
-		my $gis_outfile = "$db.gis.txt";
+		(my $db_basename = $db) =~ s|^/.*/||;    # strip any absolute path to get basename
+		my $gis_outfile = "$db_basename.gis.txt";
 		open (TMPOUT, ">", $gis_outfile) or die "Can't open $gis_outfile for writing: $!\n";
 		foreach (keys %{$acc{$db}}) {
 			print TMPOUT $_, "\n";
