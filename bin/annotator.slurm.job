@@ -1,21 +1,19 @@
 #!/bin/bash
 #SBATCH --mail-type=END
 #SBATCH --mail-user=pcantalupo@gmail.com
-#SBATCH --time=360
+#SBATCH --time=24:00:00
 #SBATCH -N 1
-#SBATCH -n 8
+#SBATCH -n 4
 #SBATCH --output=Reann.slurm.out
-#SBATCH --mem=128g
+#SBATCH --mem=32000
 
 # Command line (FOLDER is optional)
 # sbatch --export=TAX=1,FASTA=XXXX,ANNOTCONF=XXX,FOLDER=XXX --job-name=NAME JOBFILE
 
 module purge
-module load genomics
-module unload blast+/2.2.31
-module load blast+/2.6.0      # Requires Blast 2.6                
-module load RAPSearch2/2.24
-module load compiler/perl/5.22.0
+module load rapsearch/2.24
+module load blast+/2.7.1  # also loads gcc/8.2.0, perl/5.28.0
+
 
 set -u
 : $FASTA $ANNOTCONF $TAX
