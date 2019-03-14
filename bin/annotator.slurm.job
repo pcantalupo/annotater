@@ -3,9 +3,9 @@
 #SBATCH --mail-user=pcantalupo@gmail.com
 #SBATCH --time=24:00:00
 #SBATCH -N 1
-#SBATCH -n 4
+#SBATCH -n 6
 #SBATCH --output=Reann.slurm.out
-#SBATCH --mem=32000
+#SBATCH --mem=48000
 
 # Command line (FOLDER is optional)
 # sbatch --export=TAX=1,FASTA=XXXX,ANNOTCONF=XXX,FOLDER=XXX --job-name=NAME JOBFILE
@@ -19,7 +19,9 @@ set -u
 : $FASTA $ANNOTCONF $TAX
 set +u
 
-# VARIABLES
+echo -e "\nPipeline starting: $(date)" && s=$(date +%s)
+echo SLURM_JOBID: $SLURM_JOBID
+
 
 # A little function to report success or failure of job step
 function status_report () {
