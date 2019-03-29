@@ -76,12 +76,12 @@ sub GetLineage{
 	if ($self->{'gi2taxid'}{$gi}) {
 		my $taxid = $self->{'gi2taxid'}{$gi};
 		if ($self->{'taxid2lineage'}{$taxid}) {
-			print STDERR "GetLineage: have lineage for gi $gi through taxid $taxid\n";
+			#print STDERR "GetLineage: have lineage for gi $gi through taxid $taxid\n";
 			return join ("; ", @{$self->{'taxid2lineage'}{$taxid}});
 		}
 	}
 	elsif ($self->{'gi2lineage'}{$gi}) {   # this is true when no taxid was found locally and then lineage gets retrieved remotely
-		print STDERR "GetLineage: have lineage for gi $gi but not through a taxid\n";
+		#print STDERR "GetLineage: have lineage for gi $gi but not through a taxid\n";
 		return join ("; ", @{$self->{'gi2lineage'}{$gi}});
 	}
 	
@@ -105,20 +105,20 @@ sub GetLineage{
 		
 		# if we dont' get a taxid, get lineage from NCBI
 		if (!$taxid || $taxid == 0) {
-			print STDERR "GetLineage: didn't get valid taxid:<$taxid> for GI:$gi so getting lineage from NCBI\n";
+			#print STDERR "GetLineage: didn't get valid taxid:<$taxid> for GI:$gi so getting lineage from NCBI\n";
 			@lineage = gi2lineage($gi);
 		}
 		# else, get taxid from LOCAL taxonomy database
 		else {
 			# check if already have lineage for taxid
 			if ($self->{'taxid2lineage'}{$taxid}) {
-				print STDERR "GetLineage: have lineage for taxid $taxid (current gi $gi)\n";
+				#print STDERR "GetLineage: have lineage for taxid $taxid (current gi $gi)\n";
 				return join ("; ", @{$self->{'taxid2lineage'}{$taxid}});
 			}
 
 			@lineage = $self->get_taxonomy($taxid);
 			if ($lineage[0] eq "") {
-				print STDERR "GetLineage: cannot get lineage from local taxonomy even with valid taxid:<$taxid> for GI:$gi\n";
+				#print STDERR "GetLineage: cannot get lineage from local taxonomy even with valid taxid:<$taxid> for GI:$gi\n";
 			}
 		}
 	}
