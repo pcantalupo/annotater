@@ -18,16 +18,17 @@ is( $species, "Simian virus 40", "SV40 species");
 is( $genome, "dsDNA,circular,nonsegmented", "SV40 genome");
 is( accession2gi('J02400'), "965480", "SV40 acc2gi - eutils dependency");
 is( gi2taxid('965480'), "1891767", "SV40 gi2taxid - eutils dependency");
+my $sv40lineage = "Viruses; Monodnaviria; Shotokuvirae; Cossaviricota; Papovaviricetes; Sepolyvirales; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1";
 is( gi2lineage('965480'),
-	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
+	$sv40lineage,
 	"SV40 gi2lineage - eutils dependency");
 # will work with an acc.ver value as well
 is( gi2lineage('J02400.1'),
-	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
+	$sv40lineage,
 	"SV40 gi2lineage (with J02400.1) - eutils dependency");
 # will work with protein acc.ver value too
 is( gi2lineage('AAB59924.1'),
-	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
+	$sv40lineage,
 	"SV40 gi2lineage (with J02400.1) - eutils dependency");
 
 # Bacterial sequence
@@ -73,11 +74,12 @@ is( $genome, "Unknown", "Archaea genome");
 #
 # taxid2lineage testing
 #
+sleep(1);
 is( taxid2lineage('10633'),
-	"Viruses; dsDNA viruses, no RNA stage; Polyomaviridae; Betapolyomavirus; Macaca mulatta polyomavirus 1",
+	$sv40lineage,
 	"taxid2lineage tested in scalar context");
-my @sv40_expected = ('Viruses', 'dsDNA viruses, no RNA stage',
-                   'Polyomaviridae', 'Betapolyomavirus', 'Macaca mulatta polyomavirus 1');
+my @sv40_expected = ("Viruses", "Monodnaviria", "Shotokuvirae", "Cossaviricota", "Papovaviricetes", "Sepolyvirales", "Polyomaviridae", "Betapolyomavirus", "Macaca mulatta polyomavirus 1");
+sleep(1);
 my @sv40_test     = taxid2lineage(10633);
 is("@sv40_expected", "@sv40_test", "taxid2lineage tested in array context");
 

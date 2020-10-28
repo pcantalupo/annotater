@@ -78,7 +78,7 @@ is( $lineage, "", "GetLineage $algo hit to gi $gi (in local bin) but taxid not f
 #
 
 $algo = "BLASTN";  $gi = 6;
-my $expectedLineage = "cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Deuterostomia; Chordata; Craniata; Vertebrata; Gnathostomata; Teleostomi; Euteleostomi; Sarcopterygii; Dipnotetrapodomorpha; Tetrapoda; Amniota; Mammalia; Theria; Eutheria; Boreoeutheria; Laurasiatheria; Cetartiodactyla; Ruminantia; Pecora; Bovidae; Bovinae; Bos; Bos taurus";
+my $expectedLineage = "cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Deuterostomia; Chordata; Craniata; Vertebrata; Gnathostomata; Teleostomi; Euteleostomi; Sarcopterygii; Dipnotetrapodomorpha; Tetrapoda; Amniota; Mammalia; Theria; Eutheria; Boreoeutheria; Laurasiatheria; Artiodactyla; Ruminantia; Pecora; Bovidae; Bovinae; Bos; Bos taurus";
 $lineage = $lt->GetLineage($algo, $gi);
 is( $lineage, $expectedLineage, "GetLineage $algo hit to $gi (NOT in local bin)" );
 
