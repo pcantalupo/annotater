@@ -12,3 +12,5 @@ t/tag-fasta/
 t/tag-fastq/
 t/tmp/
 t/annotator/
+t/test_rapsearch/
+local/
