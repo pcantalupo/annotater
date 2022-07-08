@@ -494,9 +494,10 @@ sub is_phage {
    my $species = pop @taxa;
 
    # check known phage families first
-   if (is_phage_family( get_virus_family(@taxa) )) {
+   my $family = get_virus_family(@taxa);
+   if (is_phage_family($family)) {
       return 1;
-   } elsif ($species =~ /phage/i) {
+   } elsif ($species =~ /phage/i && $family eq "NoFamily") {
       # will catch phages that are "NoFamily" and have 'phage' in their species name
       return 1;
    } else {
@@ -525,30 +526,67 @@ sub is_phage_family {
    my $family = shift;
    return unless ($family);
 
-   my @PHAGEFAMS = qw/  Ampullaviridae
+   my @PHAGEFAMS = qw/  Ackermannviridae
+                        Ampullaviridae
+                        Anayavirus
+                        Autographiviridae
+                        Autolykiviridae
+                        Backyardiganvirus
+                        Benedictvirus
                         Bicaudaviridae
+                        Casjensviridae
                         Caudovirales
+                        Chaseviridae
                         Clavaviridae
                         Corticoviridae
+                        Crassvirales
                         Cystoviridae
+                        Demerecviridae
+                        Drexlerviridae
+                        Duinviridae
+                        Fiersviridae
+                        Finnlakeviridae
                         Fuselloviridae
+                        Gladiatorvirus
                         Globuloviridae
+                        Guelinviridae
                         Guttaviridae
+                        Herelleviridae
                         Inoviridae
+                        Jamesmcgillvirus
+                        Keshuvirus
+                        Kratiovirus
                         Leviviridae
                         Lipothrixviridae
                         Microviridae
+                        Microwolfvirus
                         Myoviridae
+                        Paulinoviridae
                         Plasmaviridae
+                        Plectroviridae
                         Pleolipoviridae
                         Podoviridae
+                        Pukovnikvirus
+                        Rountreeviridae
                         Rudiviridae
+                        Salasmaviridae
+                        Schitoviridae
                         Siphoviridae
                         Sphaerolipoviridae
                         Spiraviridae
+                        Steigviridae
+                        Steitzviridae
+                        Straboviridae
+                        Suoliviridae
+                        Swiduovirus
                         Tectiviridae
+                        Timshelvirus
                         Tristromaviridae
-                        Turriviridae/;
+                        Tsukubavirus
+                        Turbidovirus
+                        Turriviridae
+                        Veracruzvirus
+                        Zobellviridae/;
 
 
    foreach (@PHAGEFAMS) {
