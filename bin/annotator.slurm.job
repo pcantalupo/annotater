@@ -1,19 +1,19 @@
 #!/bin/bash
-#SBATCH --mail-type=END
-#SBATCH --mail-user=pcantalupo@gmail.com
+# #SBATCH --mail-type=END
+# #SBATCH --mail-user=pcantalupo@gmail.com
 #SBATCH --time=24:00:00
 #SBATCH -N 1
-#SBATCH -n 6
-#SBATCH --output=Reann.slurm.out
-#SBATCH --mem=48000
+#SBATCH -n 8
+# #SBATCH --output=Reann.slurm.out
 
 # Command line (FOLDER is optional)
-# sbatch --export=TAX=1,FASTA=XXXX,ANNOTCONF=XXX,FOLDER=XXX --job-name=NAME JOBFILE
+# sbatch --export=TAX=1,FASTA=XXXX,ANNOTCONF=XXX,FOLDER=XXX,SBATCH_OUTPUT=XXX --job-name=NAME JOBFILE
+
+. ~/local/lib/annotater/local/environment.txt
 
 module purge
 module load rapsearch/2.24
-module load blast+/2.7.1  # also loads gcc/8.2.0, perl/5.28.0
-
+module load blast+/2.13.0 
 
 set -u
 : $FASTA $ANNOTCONF $TAX
@@ -61,7 +61,8 @@ date_report $STEP_NUM "Annotating $FASTA"
 time Reann.pl -file "$FASTA" -config "$ANNOTCONF" $FOLDER_OPTION -num_threads $SLURM_CPUS_ON_NODE \
 		-evalue 1e-5 "$TAX"
 status_report "$?" $STEP_NUM
-cp -v "$ANNOTCONF" "$OUTPUTFOLDER"
-mv -v Reann.slurm.out "$OUTPUTFOLDER"
+#cp -v "$ANNOTCONF" "$OUTPUTFOLDER"
+mv -v "slurm-${SLURM_JOBID}.out" "$OUTPUTFOLDER/$SBATCH_OUTPUT"
 touch $OK
 
+exit 0
