@@ -7,6 +7,7 @@ use File::Copy;
 use SeqFile;
 use Blast;
 use Rapsearch;
+use Diamond;
 use LocalTaxonomy;
 use Taxonomy;
 use SeqUtils;
@@ -83,6 +84,9 @@ sub new{
                 }
                 elsif ($f[1] =~ /rapsearch/) {
                   push(@programs, Rapsearch->new($_,$self));
+                }
+                elsif ($f[1] =~ /diamond/) {
+                  push(@programs, Diamond->new($_,$self));
                 }
                 else {
                   die "Program $f[1] not recognized\n";
@@ -269,6 +273,7 @@ sub Taxonomy {
 	my %acc;
 	while (<IN>) {
 		my ($acc, $db) = (split (/\t/, $_, -1))[6,8];
+		$db =~ s/\.dmnd//;   # remove Diamond suffix (i.e. nr.dmnd -> nr)
 		$acc{$db}{$acc}++ unless ($acc eq "");
 	}
 
@@ -336,6 +341,7 @@ sub Taxonomy {
                         # get description from %acc hash
                         if ($gi) {
 				my $db = $rf[8];
+				$db =~ s/\.dmnd//;   # remove Diamond suffix (i.e. nr.dmnd -> nr)
 				$desc = $acc{$db}{$accession};
                         }
 		}
