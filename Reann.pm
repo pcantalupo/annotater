@@ -308,10 +308,10 @@ sub Taxonomy {
 		print "getting taxonomy solely from NCBI\n" :
 		print "getting taxonomy locally\n";
           $lt = ($self->{remotetax}) ? LocalTaxonomy->new(remotetax => 1) : LocalTaxonomy->new;
-        }
-        else {
-          print "\tSkipping LocalTaxonomy\n";
-        }
+    }
+    else {
+        print "\tSkipping LocalTaxonomy\n";
+    }
 
 	seek IN, 0, 0;                  # seek to beginning of report file
 	<IN>;
@@ -332,18 +332,18 @@ sub Taxonomy {
 
 			my $algo = $rf[7];
 			if ($self->{'tax'}) {
-			  my $lineage = $lt->GetLineage($algo, $gi, $self->{'remotetax'});
-			  if ($lineage ne "") {
-				($type, $family, $species) = lineage2tfs($lineage);
-				$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
-                          }
+				my $lineage = $lt->GetLineage($algo, $gi, $self->{'remotetax'});
+				if ($lineage ne "") {
+					($type, $family, $species) = lineage2tfs($lineage);
+					$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
+              	}
 			}
-                        # get description from %acc hash
-                        if ($gi) {
+            # get description from %acc hash
+            if ($gi) {
 				my $db = $rf[8];
 				$db =~ s/\.dmnd//;   # remove Diamond suffix (i.e. nr.dmnd -> nr)
 				$desc = $acc{$db}{$accession};
-                        }
+            }
 		}
 
 		my $is_nsf = has_nsf($rf[1]);
