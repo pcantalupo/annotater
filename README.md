@@ -1,6 +1,6 @@
 # annotater
 
-Got sequences that need annotated with various BLAST programs? [Rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/) is supported also.
+Got sequences that need annotated with various BLAST programs? [Diamond](https://github.com/bbuchfink/diamond) and [Rapsearch2](http://omics.informatics.indiana.edu/mg/RAPSearch2/) are supported also.
 
 ## Quick Start
 
@@ -13,7 +13,7 @@ make install
 
 If you encounter errors check below for the necessary dependencies that are required.
 
-Run annotater: `Reann.pl -file YOURSEQUENCES.FA -config CONFIGFILE -tax -remotetax`. These options tell annotater to search your sequences against the list of searches in your configuration file and to lookup taxonomy information (-tax) for subject hits by querying NCBI (-remotetax). Your results are found in `annotator/ann.wTax.BE.report.txt` (tab-delimited text).
+Run annotater: `Reann.pl -file YOURSEQUENCES.FA -config CONFIGFILE -tax -remotetax`. These options tell annotater to search your sequences against the list of searches in your configuration file and to lookup taxonomy information (`-tax`) for subject hits by querying NCBI (`-remotetax`). Your results are found in `annotator/ann.wTax.BE.report.txt` (tab-delimited text).
 
 ## Installation
 
@@ -24,14 +24,14 @@ Install the following and make sure they are working before proceeding:
     + Bio::DB::EUtilities
     + LWP::UserAgent
     + XML::Simple
-    + Bio::LITE::Taxonomy
-    + Bio::LITE::Taxonomy::NCBI
-    + Bio::LITE::Taxonomy::NCBI::Gi2taxid
-+ [BLAST+ >= 2.6.0](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
++ [BLAST+ >= 2.13.0](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
     + If you are going to put your BLAST databases in a single folder, add that directory to your `BLASTDB` variable.
++ [Diamond >= 2.0.15](https://github.com/bbuchfink/diamond) (optional)
 + [Rapsearch2 >= 2.24](https://sourceforge.net/projects/rapsearch2/files/) (optional)
     + I had trouble compiling Rapsearch2 and was getting weird evalues (issues [here](https://github.com/zhaoyanswill/RAPSearch2/issues/37#issuecomment-342584855) and [here](https://github.com/zhaoyanswill/RAPSearch2/issues/29#issuecomment-342583203))
+    + Due to the above issues, I use Diamond instead of Rapsearch2
 + [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy) (optional)
+    + Build a local taxonomy database using [taxonomizr](https://github.com/sherrillmix/taxonomizr)
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
 
@@ -46,16 +46,16 @@ To run the annotater image, do the following.
 
 ## Configuration
 
-Annotater requires two input files: a fasta file and a configuration file. There are example configuration files in `./configs`. The configuration that I use most often is `./configs/annot.rapsearch.conf`. Let's have a peek at its contents:
+Annotater requires two input files: a fasta file and a configuration file. There are example configuration files in `./configs`. Let's take a look at `./configs/annot.conf`.
 
 ```
--exec blastn -db human_genomic -qc 50 -pid 80 -lcase_masking -max_target_seqs 2
+-exec blastn -db GCF_000001405.39_top_level -qc 50 -pid 80 -lcase_masking -max_target_seqs 2
 -exec blastn -db nt -qc 50 -pid 80
--exec rapsearch -s f -d /mnt/mobydisk/groupshares/jpipas/pgc92/refs/blast/nr
--exec tblastx -db viral.1.1.genomic
+-exec blastx -db nr -task blastx-fast
+-exec tblastx -db ref_viruses_rep_genomes
 ```
 
-Each line specifies a different Search, either a blast program (blastn, tblastx) or Rapsearch, with its associated parameters. The searches are run in serial fashion starting from the top. Each line must start with `-exec` to tell Annotater which search program to run. Currently only BLAST+ and Rapsearch are supported. The options `-qc`, query coverage, and `-pid`, percent identity, are specific to Annotater. Query coverage and percent identity specificies the minimum % query coverage and % identity for a hit to be significant. The remaining parameters are specific to each search program; check the appropriate documentation for available options.
+Each line specifies a different Search, either a blast program (`blastn`, `tblastx`), `diamond` or `rapsearch`, with its associated parameters. The searches are run in serial fashion starting from the top. Each line must start with `-exec` to tell Annotater which search program to run. Currently only BLAST+, `diamond` and `rapsearch` are supported. The options `-qc`, query coverage, and `-pid`, percent identity, are specific to Annotater. Query coverage and percent identity specifies the minimum % query coverage and % identity for a hit to be significant. The remaining parameters are specific to each search program; check the appropriate documentation for available options.
 
 ## Usage
 
@@ -79,7 +79,7 @@ You have to specify a full path to the database file unless you place the databa
 Options such as `-num_threads` and `-evalue` will be applied to each Search in the configuration file.  The results are found in the file `./annotater/ann.wTax.BE.report.txt` (field descriptions are below). 
 
 ### Taxonomy module
-In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `report.txt` file. This is because we didn't tell Annotater to run the Taxonomy module. If you want taxonomy information about each subject such as type (i.e. bacteria, virus, etc...), virus family, species, genome type (i.e. ssRNA+, etc...), rerun the Annotater command line but this time add the parameter `-tax`. However, if you don't have a local NCBI Taxonomy database properly installed (see below), add the option '-remotetax' as well (this query NCBI for taxonomy info). Since Annotater kept track of what searches were completed, it will skip running BLASTN again on the sequence and start immediately on determining the taxonomy information. 
+In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `report.txt` file. This is because we didn't tell Annotater to run the Taxonomy module. If you want taxonomy information about each subject such as type (i.e. bacteria, virus, etc...), virus family, species, genome type (i.e. ssRNA+, etc...), rerun the Annotater command line but this time add the parameter `-tax`. However, if you don't have a local NCBI Taxonomy database properly installed (see below), add the option `-remotetax` as well (this query NCBI for taxonomy info). Since Annotater kept track of what searches were completed, it will skip running BLASTN again on the sequence and start immediately on determining the taxonomy information. 
 
 `Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50 -tax`
 
@@ -111,32 +111,25 @@ In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `rep
 
 ### NCBI Taxonomy database (optional)
 
-Get the Taxonomy files
-```
-wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_nucl.dmp.gz &
-wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_prot.dmp.gz &
-wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz &
-wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxcat.tar.gz &
-```
+Build a local copy of the [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/) using the `taxonomizr` R package ([Github](https://github.com/sherrillmix/taxonomizr)). Run the following R commands (takes several hours and about 150GB of space):
 
-Unzip each GZ file
-`for file in *gz; do echo $file; gunzip $file; done`
-
-Untar the tar archives
 ```
-tar xvf taxcat.tar
-tar xvf taxdump.tar
+library(taxonomizr)
+prepareDatabase('accessionTaxa.sql', types = c('nucl_gb', 'nucl_wgs', 'prot'))
 ```
 
-Convert DMP file to BIN file for Bio::LITE::Taxonomy::NCBI::Gi2taxid module.
-See https://github.com/pcantalupo/mytaxonomy
-`makebin.pl &`
+This will download the necessary NCBI Taxonomy files and create a file called `accessionTaxa.sql`. Then set the following environmental variables:
+1. `TAXASQL` - path to `accessionTaxa.sql`
+2. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
 
-Then set the following environmental variables:
-1. `NGT` - full path to the gi_taxid_nucl .bin file that was created with the Bio::LITE::Taxonomy::NCBI::Gi2taxid module
-2. `PGT` - same as `NGT` but to the gi_taxid_prot .bin file
-3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
 
+### Using Diamond
+
+In order to use Diamond, you need to add the `-type` parameter in the configuration file. For instance, if you want to run `diamond blastx`, add something like the following in your config file:
+
+```
+-exec diamond -type blastx -d /PATH/TO/nr.dmnd
+```
 
 
 ## Developer info
@@ -179,3 +172,37 @@ Let’s look at an example where there are three annotation steps. The restart f
 | 1  | 0,0 | 0,0 |
 | 2  | 0,0 | 0,1 |
 | 3  | 0,1 | 0,2 |
+
+
+## Deprecated
+
+### NCBI Taxonomy database (old)
+
+Get the Taxonomy files
+```
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_nucl.dmp.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_prot.dmp.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz &
+wget --quiet ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxcat.tar.gz &
+```
+
+Unzip each GZ file
+`for file in *gz; do echo $file; gunzip $file; done`
+
+Untar the tar archives
+```
+tar xvf taxcat.tar
+tar xvf taxdump.tar
+```
+
+Convert DMP file to BIN file for Bio::LITE::Taxonomy::NCBI::Gi2taxid module.
+See https://github.com/pcantalupo/mytaxonomy
+`makebin.pl &`
+
+Then set the following environmental variables:
+1. `NGT` - full path to the gi_taxid_nucl .bin file that was created with the Bio::LITE::Taxonomy::NCBI::Gi2taxid module
+2. `PGT` - same as `NGT` but to the gi_taxid_prot .bin file
+3. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
+
+
+
