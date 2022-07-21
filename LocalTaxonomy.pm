@@ -1,9 +1,9 @@
 package LocalTaxonomy;
 use strict;
 use warnings;
-use Bio::LITE::Taxonomy;
-use Bio::LITE::Taxonomy::NCBI;
-use Bio::LITE::Taxonomy::NCBI::Gi2taxid;
+#use Bio::LITE::Taxonomy;
+#use Bio::LITE::Taxonomy::NCBI;
+#use Bio::LITE::Taxonomy::NCBI::Gi2taxid;
 use Taxonomy;
 
 =head2 new
