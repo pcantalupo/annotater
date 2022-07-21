@@ -274,13 +274,14 @@ sub Taxonomy {
 	while (<IN>) {
 		my ($acc, $db) = (split (/\t/, $_, -1))[6,8];
 		$db =~ s/\.dmnd//;   # remove Diamond suffix (i.e. nr.dmnd -> nr)
-		$acc{$db}{$acc}++ unless ($acc eq "");
+		$acc{$db}{$acc}{count}++ unless ($acc eq "");
 	}
 
 	foreach my $db (keys %acc) {
 		print "\tGetting fasta seqs for $db\n";
 		(my $db_basename = $db) =~ s|^/.*/||;    # strip any absolute path to get basename
 		my $gis_outfile = "$db_basename.gis.txt";
+		$self->{dbaccfile}{$db} = $gis_outfile;  # save the db accessions filename for getting lineage below
 		open (TMPOUT, ">", $gis_outfile) or die "Can't open $gis_outfile for writing: $!\n";
 		foreach (keys %{$acc{$db}}) {
 			print TMPOUT $_, "\n";
@@ -294,23 +295,48 @@ sub Taxonomy {
 		my $seqio = Bio::SeqIO->new(-file => $fasta_outfile, -format => 'fasta');
 		while (my $seqobj = $seqio->next_seq) {
 			(my $primary_id = $seqobj->primary_id) =~ s/^lcl\|//;  # some versions of blastdbcmd prepend accession number with 'lcl|'
-			$acc{$db}{$primary_id} = $seqobj->desc;
+			$acc{$db}{$primary_id}{desc} = $seqobj->desc;
 		}
-		unlink($gis_outfile);
 	}
 
 	#
 	# get lineage information
 	my $lt;
 	if ($self->{'tax'}) {
-	  print "\tStarting LocalTaxonomy - ";
-	  ($self->{remotetax}) ?
-		print "getting taxonomy solely from NCBI\n" :
-		print "getting taxonomy locally\n";
-          $lt = ($self->{remotetax}) ? LocalTaxonomy->new(remotetax => 1) : LocalTaxonomy->new;
+	    print "\tStarting LocalTaxonomy - ";
+        if ($self->{'remotetax'}) {
+            print "getting taxonomy solely from NCBI\n";
+            $lt = LocalTaxonomy->new(remotetax => 1);
+        }
+        else {
+            print "getting taxonomy locally\n";
+            $lt = LocalTaxonomy->new();
+
+            # for each db accession file, use taxonomizr to get lineage
+            foreach my $db ( keys %{ $self->{dbaccfile} } ) {
+                my $dbaccfile = $self->{dbaccfile}{$db};
+                #print "\tGetting lineage for db accession file: ", $dbaccfile, $/;
+                my $lineagefile = $lt->GetLineage_fromTaxaSQL($dbaccfile);
+
+                open my $infile, "<", $lineagefile;
+                <$infile>; #header
+                while(<$infile>){
+                    chomp;
+                    my ($acc, undef, $lineage) = split /\t/, $_;
+                    $acc{$db}{$acc}{lineage} = $lineage;
+                }
+                close($infile);
+                #unlink($lineagefile);
+            }
+        }
     }
     else {
         print "\tSkipping LocalTaxonomy\n";
+    }
+
+    foreach my $db ( keys %{ $self->{dbaccfile} } ) {
+        my $dbaccfile = $self->{dbaccfile}{$db};
+        unlink ($dbaccfile);
     }
 
 	seek IN, 0, 0;                  # seek to beginning of report file
@@ -331,19 +357,24 @@ sub Taxonomy {
 			}
 
 			my $algo = $rf[7];
+			my $db = $rf[8];
+			$db =~ s/\.dmnd//;   # remove Diamond suffix (i.e. nr.dmnd -> nr)
+			$desc = $acc{$db}{$accession}{desc}; # get description from %acc hash
+
+            my $lineage = "";
 			if ($self->{'tax'}) {
-				my $lineage = $lt->GetLineage($algo, $gi, $self->{'remotetax'});
+				if($self->{'remotetax'}) {
+                    $lineage = $lt->GetLineage($algo, $gi, $self->{'remotetax'});
+                }
+                else {
+                    $lineage = $acc{$db}{$accession}{lineage};
+                }
+
 				if ($lineage ne "") {
 					($type, $family, $species) = lineage2tfs($lineage);
 					$genome = get_genome_type($family);    # get genome type for the family (index 1 of array)
               	}
 			}
-            # get description from %acc hash
-            if ($gi) {
-				my $db = $rf[8];
-				$db =~ s/\.dmnd//;   # remove Diamond suffix (i.e. nr.dmnd -> nr)
-				$desc = $acc{$db}{$accession};
-            }
 		}
 
 		my $is_nsf = has_nsf($rf[1]);
@@ -380,7 +411,7 @@ sub add_entropy {
 
 	# delete db fasta files
 	foreach my $db ( keys %{ $self->{dbfastafile} } ) {
-		print "\tDeleting db fastafile: ", $self->{dbfastafile}->{$db}, $/;
+		#print "\tDeleting db fastafile: ", $self->{dbfastafile}->{$db}, $/;
 		unlink ($self->{dbfastafile}->{$db});
 	}
 }

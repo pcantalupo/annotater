@@ -26,7 +26,7 @@ sub new{
 	unless (exists $self->{remotetax}) {
 		$self->{'names'} = $ENV{'NAMESDMP'} if !(defined($self->{names}) && -e $self->{names});
 		$self->{'nodes'} = $ENV{'NODESDMP'} if !(defined($self->{nodes}) && -e $self->{nodes});
-		$self->{'dict'} = new Bio::LITE::Taxonomy::NCBI(db => 'NCBI', names => $self->{names}, nodes => $self->{nodes});
+		#$self->{'dict'} = new Bio::LITE::Taxonomy::NCBI(db => 'NCBI', names => $self->{names}, nodes => $self->{nodes});
 	}
 	#$self->{'gi2lineage'} = ();
 	bless $self, $class;
@@ -60,6 +60,18 @@ sub Load{
 	}
 }
 
+
+sub GetLineage_fromTaxaSQL {
+	my ($self, $acc) = @_;
+	return 0 if !$acc;
+
+	my $cmd = "acc2lineage_wrapper.sh $acc";  # need wrapper script for HTC since the R module is incompatible with perl module
+	my $lineage = `$cmd`;
+	chomp $lineage;
+
+	#print "Lineage from acc2lineage.R script is $lineage", $/;
+	return ($lineage);
+}
 
 # Tries to get taxonomy lineage from local installation of taxonomy db
 # but if it fails, then it sends query to NCBI (gi2lineage subroutine)
