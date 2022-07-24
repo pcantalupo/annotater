@@ -35,15 +35,6 @@ Install the following and make sure they are working before proceeding:
 
 Clone repository. Add the `annotater` directory path to your `PATH` and `PERL5LIB` variables. In addition, add `annotater/bin` directory path to your `PATH` variable. Set a `BLASTDB` environmental variable using a full path to the location of your BLAST databases (tilde `~` is not allowed in the path). All the BLAST databases need to be in the same folder unless you specify full paths in the configuration file.
 
-### Docker installation
-
-You can build your own docker image by running `docker build -t annotater .` or you can download the annotater image from Docker Hub with `docker pull virushunter/annotater`
-
-To run the annotater image, do the following.
-
-`docker run -ti -v $(pwd):/tmp/dockertest -v /PATH/TO/blast_databases:/refs/blast virushunter/annotater bash`
-
-
 ## Configuration
 
 Annotater requires two input files: a fasta file and a configuration file. There are example configuration files in `./configs`. Let's take a look at `./configs/annot.conf`.
@@ -82,6 +73,16 @@ Options such as `-num_threads` and `-evalue` will be applied to each Search in t
 In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `report.txt` file. This is because we didn't tell Annotater to run the Taxonomy module. If you want taxonomy information about each subject such as type (i.e. bacteria, virus, etc...), virus family, species, genome type (i.e. ssRNA+, etc...), rerun the Annotater command line but this time add the parameter `-tax`. However, if you don't have a local NCBI Taxonomy database properly installed (see below), add the option `-remotetax` as well (this query NCBI for taxonomy info). Since Annotater kept track of what searches were completed, it will skip running BLASTN again on the sequence and start immediately on determining the taxonomy information. 
 
 `Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50 -tax`
+
+### Running Annotater with Docker
+
+You can build your own docker image by running `docker build -t annotater .` or you can download the annotater image from Docker Hub with `docker pull virushunter/annotater`
+
+To run Annotater using the `e7.fa` example above, use the following command line but make sure to change the `/PATH/TO/BLASTDIR` as appropriate for your setup.
+
+`docker run --rm -ti -v $(pwd):$(pwd) -v /PATH/TO/BLASTDIR:/PATH/TO/BLASTDIR -w $(pwd) virushunter/annotater Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50`
+
+The results will be found in the `./annotator/` folder.
 
 ### Annotater Report.txt file field descriptions:
 
