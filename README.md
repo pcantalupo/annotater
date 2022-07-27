@@ -67,24 +67,7 @@ You have to specify a full path to the database file unless you place the databa
 
 `Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50`
 
-Options such as `-num_threads` and `-evalue` will be applied to each Search in the configuration file.  The results are found in the file `./annotater/ann.wTax.BE.report.txt` (field descriptions are below). 
-
-### Taxonomy module
-In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `report.txt` file. This is because we didn't tell Annotater to run the Taxonomy module. If you want taxonomy information about each subject such as type (i.e. bacteria, virus, etc...), virus family, species, genome type (i.e. ssRNA+, etc...), rerun the Annotater command line but this time add the parameter `-tax`. However, if you don't have a local NCBI Taxonomy database properly installed (see below), add the option `-remotetax` as well (this query NCBI for taxonomy info). Since Annotater kept track of what searches were completed, it will skip running BLASTN again on the sequence and start immediately on determining the taxonomy information. 
-
-`Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50 -tax`
-
-### Running Annotater with Docker
-
-You can build your own docker image by running `docker build -t annotater .` or you can download the annotater image from Docker Hub with `docker pull virushunter/annotater`
-
-To run Annotater using the `e7.fa` example above, use the following command line but make sure to change the `/PATH/TO/BLASTDIR` as appropriate for your setup.
-
-`docker run --rm -ti -v $(pwd):$(pwd) -v /PATH/TO/BLASTDIR:/PATH/TO/BLASTDIR -w $(pwd) virushunter/annotater Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50`
-
-The results will be found in the `./annotator/` folder.
-
-### Annotater Report.txt file field descriptions:
+Options such as `-num_threads` and `-evalue` will be applied to each Search in the configuration file.  The results are found in the file `./annotater/ann.wTax.BE.report.txt`. The fields and their descriptions are: 
 
 1. seqID - sequence identifier
 2. seq - sequence
@@ -110,6 +93,11 @@ The results will be found in the `./annotator/` folder.
 22. shsp_ent - nucleotide entropy of the subject sequence from Sstart to Send, inclusive
 23. shsp_%lc - percent of low complexity amino acids in the subject sequence from Sstart to Send, inclusive
 
+### Taxonomy module
+In the `e7.fa` example above, notice that columns 9 to 12 are `NULL` in the `report.txt` file. This is because we didn't tell Annotater to run the Taxonomy module. If you want taxonomy information about each subject such as type (i.e. bacteria, virus, etc...), virus family, species, genome type (i.e. ssRNA+, etc...), rerun the Annotater command line but this time add the parameter `-tax`. However, if you don't have a local NCBI Taxonomy database properly installed (see below), add the option `-remotetax` as well (this query NCBI for taxonomy info). Since Annotater kept track of what searches were completed, it will skip running BLASTN again on the sequence and start immediately on determining the taxonomy information. 
+
+`Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50 -tax`
+
 ### NCBI Taxonomy database (optional)
 
 Build a local copy of the [NCBI Taxonomy database](https://ftp.ncbi.nih.gov/pub/taxonomy/accession2taxid/) using the `taxonomizr` R package ([Github](https://github.com/sherrillmix/taxonomizr)). Run the following R commands (takes several hours and about 150GB of space):
@@ -123,6 +111,25 @@ This will download the necessary NCBI Taxonomy files and create a file called `a
 1. `TAXASQL` - path to `accessionTaxa.sql`
 2. `NAMESDMP` and `NODESDMP` - full path to names.dmp and nodes.dmp, respectively
 
+### Running Annotater with Docker
+
+You can build your own docker image by running `docker build -t annotater .` or you can download the annotater image from Docker Hub with `docker pull virushunter/annotater`
+
+To run Annotater using the `e7.fa` example above, use the following command line but make sure to change the `/PATH/TO/BLASTDIR` as appropriate for your setup.
+
+`docker run --rm -ti -v $(pwd):$(pwd) -v /PATH/TO/BLASTDIR:/PATH/TO/BLASTDIR -w $(pwd) virushunter/annotater Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50`
+
+If you want to run the Taxonomy module, you need to add a volume mount for your taxonomy directory that contains `accessionTaxa.sql`. Also, you need to set the environment variables pointing to the location of the taxonomy files. Here is the complete docker command (make sure to change the directory paths to match your setup)
+
+```
+docker run --rm -ti -v $(pwd):$(pwd) -v /PATH/TO/BLASTDIR:/PATH/TO/BLASTDIR \
+-v /PATH/TO/TAXONOMYDIR:/PATH/TO/TAXONOMYDIR \
+-w $(pwd) \
+-e TAXASQL=/PATH/TO/TAXONOMYDIR/accessionTaxa.sql \
+-e NAMESDMP=/PATH/TO/TAXONOMYDIR/names.dmp \
+-e NODESDMP=/PATH/TO/TAXONOMYDIR/nodes.dmp \
+virushunter/annotater Reann.pl -file e7.fa -config config.txt -num_threads 4 -evalue 1e-50
+```
 
 ### Using Diamond
 
