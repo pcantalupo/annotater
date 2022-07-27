@@ -12,9 +12,6 @@ WriteMakefile(
   },
   PREREQ_PM => {
     "XML::Simple" => '2.20',
-    "Bio::LITE::Taxonomy" => '0.07',
-    "Bio::LITE::Taxonomy::NCBI" => '0.1',
-    "Bio::LITE::Taxonomy::NCBI::Gi2taxid" => '0.13',
     "BioPerl" => 0,
     "Bio::DB::EUtilities" => 0,
   },
