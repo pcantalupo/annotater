@@ -19,7 +19,7 @@ sub new {
 
   if (! -e $self->{'db'} && ! -e $self->{'db'} . ".dmnd") {
     print "Please provide absolute path to DMND database file in the config file with -d option\n";
-    exit;
+    exit 1;
   }
 
   $self->{'params'}{'vals'} = \@opts;
