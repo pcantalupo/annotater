@@ -1,17 +1,17 @@
-
-// Log messages to terminal
-println "Command line           : $workflow.commandLine"
-println "Project dir            : $workflow.projectDir"
-println "Fasta file             : $params.fasta"
-println "Annotater config file  : $params.config"
-
-println "\nBelow are global parameter settings that might be overridden in the Annotater config file"
-println "Global evalue          : $params.evalue"
-println "Global query coverage  : $params.qc"
-println "Global % identity      : $params.pid"
-println "\n"
-
 workflow {
+  // Log messages to terminal
+  println "Command line           : $workflow.commandLine"
+  println "Project dir            : $workflow.projectDir"
+  println "Fasta file             : $params.fasta"
+  println "Annotater config file  : $params.config"
+
+  println "\nBelow are global parameter settings that might be overridden in the Annotater config file"
+  println "Global evalue          : $params.evalue"
+  println "Global query coverage  : $params.qc"
+  println "Global % identity      : $params.pid"
+  println "\n"
+
+  // Validate parameters
   if (params.fasta == null || params.config == null) {
       exit 1, """
       ERROR: Missing input parameters.
@@ -25,7 +25,6 @@ workflow {
   fasta_ch = Channel.fromPath(params.fasta)
   config_ch = Channel.fromPath(params.config)
 
-  // Validate taxonomy parameters
   // if --tax was set and --remotetax was not, need to specify --taxasql, --nodesdmp, and --namesdmp 
   if (params.tax && !params.remotetax && 
       (params.taxasql == null || params.nodesdmp == null || params.namesdmp == null) ) {
@@ -42,6 +41,8 @@ process ANNOTATER {
                   'docker://virushunter/annotater:v1.0.1' :
                   'virushunter/annotater:v1.0.1' }"
 
+  publishDir "$params.pipeline_outdir/", mode: 'copy'
+
   input:
   path fasta_file    // The input FASTA sequence file
   path config_file   // The configuration file for Reann.pl
@@ -50,8 +51,6 @@ process ANNOTATER {
   path "${params.outdir}/ann*"
   path "${params.outdir}/*txt"
   path "${params.outdir}/*log*"
-
-  publishDir "$params.pipeline_outdir/", mode: 'copy'
 
   script:
   """
