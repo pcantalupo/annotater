@@ -39,8 +39,8 @@ process ANNOTATER {
   tag "${fasta_file.simpleName}"
 
   container "${ workflow.containerEngine == 'singularity' ?
-                  'docker://virushunter/annotater' :
-                  'virushunter/annotater' }"
+                  'docker://virushunter/annotater:v1.0.1' :
+                  'virushunter/annotater:v1.0.1' }"
 
   input:
   path fasta_file    // The input FASTA sequence file
